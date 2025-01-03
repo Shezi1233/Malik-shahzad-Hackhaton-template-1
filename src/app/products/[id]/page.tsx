@@ -3,12 +3,12 @@ import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Check, Link, Minus, Plus } from "lucide-react";
+import { Check,  Minus, Plus } from "lucide-react";
 import AllReviw from "@/components/allreviws";
-import Products from "../page";
+
 import Tshirts from "@/components/products";
 import { BreadcrumbDemo } from "@/components/Bredcrupm";
-import { link } from "fs";
+
 
 // Adding key prop in star array
 let star = [

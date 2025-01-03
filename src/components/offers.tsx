@@ -1,5 +1,5 @@
 import { MdOutlineEmail } from "react-icons/md";
-import { FaSearchengin } from "react-icons/fa6";
+
 
 export default function Offers(){
     return(
