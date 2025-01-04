@@ -18,10 +18,9 @@ const checkboxColors = [
 
 export function CheckboxDemo() {
   return (
-  <div>
-       <h1 className="text-xl font-bold pl-5">Colors</h1>
+    <div>
+      <h1 className="text-xl font-bold pl-5">Colors</h1>
       <div className="flex flex-wrap gap-1 px-5 mt-2">
-        
         {checkboxColors.map((color, index) => (
           <div key={index} className="flex items-center space-x-2">
             <Checkbox
@@ -31,12 +30,10 @@ export function CheckboxDemo() {
             <label
               htmlFor={`checkbox-${index}`}
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-          
-            </label>
+            ></label>
           </div>
         ))}
       </div>
-  </div>
+    </div>
   );
 }

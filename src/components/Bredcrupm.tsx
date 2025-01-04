@@ -1,22 +1,22 @@
 import {
-    Breadcrumb,
-    BreadcrumbEllipsis,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbSeparator,
-  } from "@/components/ui/breadcrumb"
-  import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
-  
-  export function BreadcrumbDemo() {
-    return (
-     <div className="px-5 max-w-screen-2xl mx-auto">
-         <Breadcrumb>
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export function BreadcrumbDemo() {
+  return (
+    <div className="px-5 max-w-screen-2xl mx-auto">
+      <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="/">Home</BreadcrumbLink>
@@ -37,10 +37,8 @@ import {
             <BreadcrumbLink href="/">T-shirts</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-         
         </BreadcrumbList>
       </Breadcrumb>
-     </div>
-    )
-  }
-  
+    </div>
+  );
+}

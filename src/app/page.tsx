@@ -2,10 +2,11 @@
 import Fonts from "@/components/fonts";
 
 import Hero from "@/components/Hero";
-import Products, { Buttons } from "./products/page";
-import Top_sell, { Buttons2 } from "./products/sell";
+import Products  from "./products/page";
+import Top_sell from "./products/sell";
 import Dress from "@/components/dress";
 import CustomerCarousel from "@/components/couresel";
+import { Buttons, Buttons2 } from "@/components/buttons";
 
 
 

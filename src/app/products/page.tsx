@@ -91,13 +91,3 @@ export default function Products(){
 }
 
 
-
-export const Buttons = () => {
-  return (
-    <div className="flex justify-center items-center mt-20">
-          <button className="">View All</button>
-    </div>
-  )
-}
-
-

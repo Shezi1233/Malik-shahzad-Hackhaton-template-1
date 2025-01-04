@@ -1,20 +1,20 @@
 import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-  } from "@/components/ui/accordion"
-import { Filter } from "lucide-react"
-  
-  export function AccordionDemo() {
-    return (
-     <div className="p-5">
-         <div className="flex justify-between items-center">
-         <h1 className="font-bold">Filter</h1> 
-         <Filter/>
-         </div>
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Filter } from "lucide-react";
 
-        <Accordion type="single" collapsible className="w-full">
+export function AccordionDemo() {
+  return (
+    <div className="p-5">
+      <div className="flex justify-between items-center">
+        <h1 className="font-bold">Filter</h1>
+        <Filter />
+      </div>
+
+      <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="item-1">
           <AccordionTrigger>Is it accessible?</AccordionTrigger>
           <AccordionContent>
@@ -31,18 +31,18 @@ import { Filter } from "lucide-react"
         <AccordionItem value="item-3">
           <AccordionTrigger>Is it animated?</AccordionTrigger>
           <AccordionContent>
-            Yes. It&apos;s animated by default, but you can disable it if you prefer.
+            Yes. It&apos;s animated by default, but you can disable it if you
+            prefer.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-4">
           <AccordionTrigger>Is it animated?</AccordionTrigger>
           <AccordionContent>
-            Yes. It&apos;s animated by default, but you can disable it if you prefer.
+            Yes. It&apos;s animated by default, but you can disable it if you
+            prefer.
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-
-     </div>  
-    )
-  }
-  
+    </div>
+  );
+}
