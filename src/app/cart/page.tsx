@@ -1,5 +1,5 @@
 import { BreadcrumbDemo } from "@/components/Bredcrupm";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/buttons";
 import { Delete, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 
@@ -98,16 +98,22 @@ export default function Cart() {
             <p className="flex justify-between">
               Total <span>$467</span>{" "}
             </p>
-            <div className="flex">
+
+            <div className="flex flex-col md:flex-row md:items-center md:space-x-2 space-y-2 md:space-y-0">
               <input
-                className="bg-[#F0F0F0] w-[200px] md:w-full py-2 px-5 rounded-full text-gray-600 outline-none"
+                className="bg-[#F0F0F0] w-full py-2 px-5 rounded-full text-gray-600 outline-none"
                 placeholder="Add promo code"
               />
-              <Button className="ml-1 rounded-full text-sm font-light w-[119px] h-[48px] my-5">
+              <Button className="rounded-full text-sm font-light w-full md:w-auto h-[48px]">
                 Apply
               </Button>
             </div>
-            <Button className="w-full rounded-full">Go To Checkout</Button>
+            <a href="/checkout">
+            <Button className="w-full rounded-full mt-14">Go To Checkout</Button>
+            </a>
+            <a href="/ordertracking">
+            <Button className="w-full rounded-full mt-5">Order Tracking</Button>
+            </a>
           </div>
         </div>
       </div>

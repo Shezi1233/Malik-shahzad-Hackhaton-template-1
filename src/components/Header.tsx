@@ -1,8 +1,13 @@
+
 import { FaCartShopping } from "react-icons/fa6";
 import { FaSearchengin } from "react-icons/fa6";
 import Link from "next/link";
 import { SheetSide } from "./sheet";
 import { NavigationMenuDemo } from "./NavigationMenu";
+import { MdOutlinePermIdentity } from "react-icons/md";
+import Notifications from "./notifications";
+import { IoNotifications } from "react-icons/io5";
+
 
 export default function Header() {
   return (
@@ -41,7 +46,10 @@ export default function Header() {
         <Link href={"/cart"}>
           <FaCartShopping className="texl-2xl" />
         </Link>
-        <FaCartShopping className="texl-2xl" />
+        <Link href={"/usersignup"}>
+        <MdOutlinePermIdentity className="hover:bg-gray-200 text-2xl" />
+        </Link>
+        <Notifications/>
       </div>
     </header>
   );

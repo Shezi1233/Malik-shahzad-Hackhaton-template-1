@@ -5,7 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Filter } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "./ui/buttons";
 
 export function Dressstyle() {
   return (

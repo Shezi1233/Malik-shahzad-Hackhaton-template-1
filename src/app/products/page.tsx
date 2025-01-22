@@ -50,6 +50,7 @@ let star = [
     <FaStar key={5} />,
 ];
 export default function Products(){
+    
     return(
         <div className="w-full h-full sm:h-[500px] mt-10">
             {/* <h1 className="text-3xl md:text-5xl font-black text-black text-center">NEW ARRIVALS</h1> */}

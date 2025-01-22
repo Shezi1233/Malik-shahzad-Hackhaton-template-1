@@ -2,12 +2,13 @@
 import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/buttons";
 import { Check, Minus, Plus } from "lucide-react";
 import AllReviw from "@/components/allreviws";
 
 import Tshirts from "@/components/products";
 import { BreadcrumbDemo } from "@/components/Bredcrupm";
+import Chatbot from "@/components/chatbot";
 
 // Adding key prop in star array
 let star = [
@@ -147,6 +148,7 @@ let product: Iproducts[] = [
 ];
 
 export default function Pro_Detail() {
+  
   const params = useParams();
   const id = params.id; //dynamic id ye se milengii
   const item = product.find((item) => item.id === Number(id));
@@ -196,7 +198,7 @@ export default function Pro_Detail() {
         {/* right div */}
         <div className=" w-full sm:w-[600px] h-[500px] mt-3 order-3">
           <h1 className="text-2xl md:text-3xl font-bold">
-            One Life Graphic T-shirt
+           {item.title}
           </h1>
           <div className="flex text-yellow-400">
             {star.map((icon, index) => (
@@ -207,8 +209,7 @@ export default function Pro_Detail() {
             {item.price} <span>{item.old_price}</span>{" "}
           </p>
           <p>
-            This graphic t-shirt which is perfect for any occasion. Crafted from
-            a soft and breathable fabric, it offers superior comfort and style.
+          
           </p>
           {/* select color */}
           <div className=" mt-5">
@@ -227,8 +228,8 @@ export default function Pro_Detail() {
           </div>
           {/* Choose Size */}
           <div className="mt-4">
-            <p className="text-gray-500">Choose Size</p>
-            <div className="flex space-x-3 mt-2">
+            <p className="text-gray-500">Sizes</p>
+            {/* <div className="flex space-x-3 mt-2">
               <div className="w-[80px]   h-[40px] flex justify-center items-center rounded-[62px] bg-[#F0F0F0] text-gray-400 ">
                 Small
               </div>
@@ -241,7 +242,7 @@ export default function Pro_Detail() {
               <div className="w-[90px] h-[40px] flex justify-center items-center rounded-[62px] bg-[#F0F0F0] text-gray-400 ">
                 X-Large
               </div>
-            </div>
+            </div> */}
           </div>
           {/* BTNS */}
           <div className="flex justify-start items-center mt-7 space-x-4">
@@ -260,6 +261,7 @@ export default function Pro_Detail() {
       </div>
       <AllReviw />
       <Tshirts />
+      <Chatbot/>
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { FaStar } from "react-icons/fa6";
-import { Button } from "./ui/button";
+import { Button } from "./ui/buttons";
 
 const Review = [
   {
