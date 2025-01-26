@@ -1,0 +1,11 @@
+est Case ID,Test Case Description,Test Steps,Expected Result,Actual Result,Status,Severity Level,Remarks
+TC001,Validate product listing page,Open product page > Verify products,Products displayed correctly,Products displayed correctly,Passed,Low,No issues found
+TC002,Test API error handling,Disconnect API > Refresh page,Show fallback UI with error message,Error message shown,Passed,Medium,Handled gracefully
+TC003,Check cart functionality,Add product to cart > Verify cart contents,Cart updates with added product,Cart updates as expected,Passed,High,Works as expected
+TC004,Ensure responsiveness on mobile,Resize browser window > Check layout,Layout adjusts properly to screen size,Responsive layout working as intended,Passed,Medium,Test successful
+TC005,Validate animations with Framer Motion,Trigger page animations > Verify animation smoothness,Animations load without issues and are smooth,Animations smooth,Passed,Medium,No issues found
+TC006,Check dynamic product listing,Load page > Verify products dynamically loaded,Products load dynamically based on user actions or filters,Products load dynamically,Passed,High,Works as expected
+TC007,Test notifications,Trigger notification > Check notification display,Notification appears and disappears after the correct time,Notifications working,Passed,Low,Test successful
+TC008,Validate sign up/sign in functionality,Open sign up/sign in page > Enter credentials > Submit,User should be signed in successfully or sign up should complete,Sign up/sign in not work properply,Passed,Critical,Issues found with sign in and sign up method
+TC009,Test checkout process,Add items to cart > Proceed to checkout > Complete payment,"Checkout process works smoothly, payment successful",Checkout complete,High,Critical,Issues found with payment gateway
+TC010,Test chatbot messenger functionality,Open chatbot > Send a message > Verify response,Chatbot responds with relevant message,Chatbot responds as expected,Passed,Medium,No issues with responses

@@ -9,6 +9,9 @@ import AllReviw from "@/components/allreviws";
 import Tshirts from "@/components/products";
 import { BreadcrumbDemo } from "@/components/Bredcrupm";
 import Chatbot from "@/components/chatbot";
+import LazyLoadImage from "@/components/lazyload";
+import { motion } from "framer-motion";
+import { fadeIn } from "@/components/variants";
 
 // Adding key prop in star array
 let star = [
@@ -163,30 +166,36 @@ export default function Pro_Detail() {
         {/* left */}
         <div className=" flex sm:flex-col  justify-between items-center w-full sm:w-[152px] order-2 sm:order-1">
           {/* images */}
-          <Image
+          <LazyLoadImage
+           className=" w-[100px] sm:w-full h-[100px] sm:h-[150px]"
             src={item.img1}
-            className=" w-[100px] sm:w-full h-[100px] sm:h-[150px]"
             alt="productdetaile"
             width={100}
             height={100}
-          ></Image>
-          <Image
+          />
+           <LazyLoadImage
             src={item.img2}
             className=" w-[100px] sm:w-full h-[100px] sm:h-[150px] sm:mt-3"
             alt="productdetaile"
             width={100}
             height={100}
-          ></Image>
-          <Image
+          />
+          <LazyLoadImage
             src={item.img3}
             className=" w-[100px] sm:w-full h-[100px] sm:h-[150px] sm:mt-3"
             alt="productdetaile"
             width={100}
             height={100}
-          ></Image>
+          />
         </div>
         {/* mid div */}
-        <div className="w-full sm:w-[444px] h-[260px] sm:h-[500px] mt-5 sm:mt-0 order-1 sm:order-2">
+        <motion.div
+         variants={fadeIn("up",0.2)}
+              initial = "hidden"
+              whileInView={"show"}
+              viewport={{once: false , amount: 0.7}}
+        
+        className="w-full sm:w-[444px] h-[260px] sm:h-[500px] mt-5 sm:mt-0 order-1 sm:order-2">
           <Image
             src={item.img3}
             alt="productdetaile"
@@ -194,9 +203,14 @@ export default function Pro_Detail() {
             width={100}
             height={100}
           ></Image>
-        </div>
+        </motion.div>
         {/* right div */}
-        <div className=" w-full sm:w-[600px] h-[500px] mt-3 order-3">
+        <motion.div 
+         variants={fadeIn("down",0.2)}
+         initial = "hidden"
+         whileInView={"show"}
+         viewport={{once: false , amount: 0.7}}
+        className=" w-full sm:w-[600px] h-[500px] mt-3 order-3">
           <h1 className="text-2xl md:text-3xl font-bold">
            {item.title}
           </h1>
@@ -229,7 +243,7 @@ export default function Pro_Detail() {
           {/* Choose Size */}
           <div className="mt-4">
             <p className="text-gray-500">Sizes</p>
-            {/* <div className="flex space-x-3 mt-2">
+            <div className="flex space-x-3 mt-2">
               <div className="w-[80px]   h-[40px] flex justify-center items-center rounded-[62px] bg-[#F0F0F0] text-gray-400 ">
                 Small
               </div>
@@ -242,7 +256,7 @@ export default function Pro_Detail() {
               <div className="w-[90px] h-[40px] flex justify-center items-center rounded-[62px] bg-[#F0F0F0] text-gray-400 ">
                 X-Large
               </div>
-            </div> */}
+            </div>
           </div>
           {/* BTNS */}
           <div className="flex justify-start items-center mt-7 space-x-4">
@@ -257,7 +271,7 @@ export default function Pro_Detail() {
               </Button>
             </a>
           </div>
-        </div>
+        </motion.div>
       </div>
       <AllReviw />
       <Tshirts />

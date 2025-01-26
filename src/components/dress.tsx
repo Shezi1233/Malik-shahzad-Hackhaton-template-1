@@ -1,8 +1,18 @@
+"use client"
+import { motion } from "framer-motion";
 import Image from "next/image";
+import { fadeIn } from "./variants";
 
 export default function Dress() {
   return (
-    <div className="w-full h-full mt-8  sm:h-[500px] bg-[#F0F0F0] flex flex-col  justify-start items-center pt-8  max-w-screen-2xl mx-auto">
+    <motion.div 
+     variants={fadeIn("left",0.2)}
+          initial = "hidden"
+          whileInView={"show"}
+          viewport={{once: false , amount: 0.7}}
+    
+    
+    className="w-full h-full mt-8  sm:h-[500px] bg-[#F0F0F0] flex flex-col  justify-start items-center pt-8  max-w-screen-2xl mx-auto">
       {/* top div */}
       <div className="mt-8 mb-5">
         {/* <h1 className="text-5xl  my-6 font-black pl-6 sm:pl-0">BROWSE BY DRESS STYLE</h1> */}
@@ -57,6 +67,6 @@ export default function Dress() {
           <span className="absolute top-10 left-5 font-bold text-xl">Gym</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

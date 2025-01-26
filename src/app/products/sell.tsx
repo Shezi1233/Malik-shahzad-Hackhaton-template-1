@@ -1,6 +1,10 @@
+"use client"
+import { fadeIn } from "@/components/variants";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { FaStar } from "react-icons/fa";
+
 
 interface Iproducts {
   title: string;
@@ -49,7 +53,14 @@ let star = [
 ];
 export default function Top_sell() {
   return (
-    <div className="w-full h-full sm:h-[500px] mt-10">
+    <motion.div 
+     variants={fadeIn("down",0.2)}
+          initial = "hidden"
+          whileInView={"show"}
+          viewport={{once: false , amount: 0.7}}
+    
+    
+    className="w-full h-full sm:h-[500px] mt-10">
       {/* <h1 className="text-3xl md:text-5xl font-black text-black text-center">TOP SELLING</h1> */}
       <div className="flex justify-center items-center mt-8">
         <img className="mt-12" src="/images/top.png" alt="NEW ARRIVALS" />
@@ -59,7 +70,7 @@ export default function Top_sell() {
           return (
             <div key={data.id}>
               <Link href={`/products/${data.id}`}>
-                <div className="w-[230px] h-[230px] bg-[#F0EEED] rounded-[20px]">
+                <div className="w-[190px] h-[190px] md:w-[290px] md:h-[290px] bg-[#F0EEED] rounded-[20px]">
                   <Image
                     src={data.img_url}
                     alt={data.title}
@@ -88,6 +99,6 @@ export default function Top_sell() {
           );
         })}
       </div>
-    </div>
+    </motion.div>
   );
 }

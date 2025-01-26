@@ -1,6 +1,9 @@
+
+import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { FaStar } from "react-icons/fa";
+import { fadeIn } from "./variants";
 
 interface Iproducts {
   title: string;
@@ -10,6 +13,7 @@ interface Iproducts {
   old_price?: string;
   img_url: string;
 }
+
 
 let product: Iproducts[] = [
   {
@@ -49,7 +53,12 @@ let star = [
 ];
 export default function Tshirts() {
   return (
-    <div className="w-full h-full sm:h-[500px] mt-10  max-w-screen-2xl mx-auto">
+    <motion.div 
+     variants={fadeIn("up",0.2)}
+          initial = "hidden"
+          whileInView={"show"}
+          viewport={{once: false , amount: 0.7}}
+    className="w-full h-full sm:h-[500px] mt-10  max-w-screen-2xl mx-auto">
       <div className="flex justify-center items-center ">
         <img className="mt-7 mb-6" src="/images/productpage.png" alt="" />
       </div>
@@ -88,6 +97,6 @@ export default function Tshirts() {
           );
         })}
       </div>
-    </div>
+    </motion.div>
   );
 }
