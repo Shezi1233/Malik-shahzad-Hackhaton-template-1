@@ -7,10 +7,7 @@ import Footer from "@/components/footer";
 import { CartProvider } from "@/components/cartContext";
 import {
   ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton
+  
 } from '@clerk/nextjs'
 
 const inter = Inter({ subsets: ["latin"] });
