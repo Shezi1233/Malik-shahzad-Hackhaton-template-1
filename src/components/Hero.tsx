@@ -1,19 +1,19 @@
-"use client"
+"use client";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { fadeIn } from "./variants";
 
 export default function Hero() {
   return (
-    <main className=" max-w-screen-2xl mx-auto w-full h-full md:h-[500px] flex flex-col md:flex-row justify-between items-start bg-[#F2F0F1]">
+    <main className="max-w-screen-2xl mx-auto w-full h-full md:h-[500px] flex flex-col md:flex-row justify-between items-start bg-[#F2F0F1]">
       {/* left */}
-      <motion.div 
-       variants={fadeIn("up",0.2)}
-            initial = "hidden"
-            whileInView={"show"}
-            viewport={{once: false , amount: 0.7}}
-      className="w-full md:w-[500px] mt-3 md:mt-10 md:ml-10 pl-3">
-        {/* <h1 className="text-2xl md:text-5xl font-black text-black">FIND CLOTHES THAT MATCHES YOUR STYLE</h1> */}
+      <motion.div
+        variants={fadeIn("up", 0.2)}
+        initial="hidden"
+        whileInView={"show"}
+        viewport={{ once: false, amount: 0.7 }}
+        className="w-full md:w-[500px] mt-3 md:mt-10 md:ml-10 pl-3"
+      >
         <img className="mt-7 mb-6" src="/images/Hero.png" alt="" />
         <p className="text-sm md:mt-3 text-gray-600">
           Browse through our diverse range of meticulously crafted garments,
@@ -21,18 +21,19 @@ export default function Hero() {
           style.
         </p>
         <a href="casual">
-          <button className="bg-black py-2 px-8 rounded-full mt-4  text-white text-sm">
+          <button className="bg-black py-2 px-8 rounded-full mt-4 text-white text-sm">
             Shop Now
           </button>
         </a>
       </motion.div>
       {/* right */}
-      <motion.div 
-       variants={fadeIn("down",0.2)}
-       initial = "hidden"
-       whileInView={"show"}
-       viewport={{once: false , amount: 0.7}}
-      className="relative">
+      <motion.div
+        variants={fadeIn("down", 0.2)}
+        initial="hidden"
+        whileInView={"show"}
+        viewport={{ once: false, amount: 0.7 }}
+        className="relative"
+      >
         <Image
           src={"/profile.png"}
           className="w-[500px] mr-4"
@@ -40,21 +41,43 @@ export default function Hero() {
           height={200}
           alt="profile"
         ></Image>
-        {/* star */}
-        <Image
-          src={"/star.png"}
-          className="w-[50px] md:w-[100px] absolute top-[100px] left-10 md:top-[300px] md:left-[-100px]"
-          width={200}
-          height={200}
-          alt="profile"
-        ></Image>
-        <Image
-          src={"/star.png"}
-          className=" w-[60px] md:w-[100px] absolute top-10 right-[50px] md:top-[50px] md:right-[30px]"
-          width={200}
-          height={200}
-          alt="profile"
-        ></Image>
+        {/* Rotating stars */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{
+            repeat: Infinity,
+            duration: 5,
+            ease: "linear",
+          }}
+          className="absolute"
+          style={{ top: "100px", left: "10px" }}
+        >
+          <Image
+            src={"/star.png"}
+            className=" w-[50px] md:w-[100px]"
+            width={200}
+            height={200}
+            alt="rotating star"
+          />
+        </motion.div>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{
+            repeat: Infinity,
+            duration: 5,
+            ease: "linear",
+          }}
+          className="absolute"
+          style={{ top: "10px", right: "50px" }}
+        >
+          <Image
+            src={"/star.png"}
+            className="w-[60px] md:w-[100px]"
+            width={200}
+            height={200}
+            alt="rotating star"
+          />
+        </motion.div>
       </motion.div>
     </main>
   );
