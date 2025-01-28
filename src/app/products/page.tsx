@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import Image from "next/image";
 import Link from "next/link";
 import { FaStar } from "react-icons/fa";
@@ -73,7 +73,7 @@ export default function Products() {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 px-8 mt-10">
         {product.map((data) => {
           return (
-            <div key={data.id} className="flex flex-col items-center p-4 bg-white rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300">
+            <div key={data.id} className="flex flex-col items-center">
               <Link href={`/products/${data.id}`}>
                 <div className="w-full h-[250px] sm:h-[300px] md:h-[350px] bg-[#F0EEED] rounded-[20px] overflow-hidden">
                   <Image
@@ -85,14 +85,14 @@ export default function Products() {
                   />
                 </div>
               </Link>
-              <div className="text-center mt-3">
-                <p className="text-base sm:text-lg font-semibold text-gray-800">{data.title}</p>
+              <div className="text-center mt-2">
+                <p className="text-base sm:text-lg font-bold">{data.title}</p>
                 <div className="flex justify-center text-yellow-400 mt-1">
                   {star.map((icon, index) => (
                     <span key={index}>{icon}</span>
                   ))}
                 </div>
-                <p className="font-bold mt-2 text-sm sm:text-base text-gray-800">
+                <p className="font-bold mt-2 text-sm sm:text-base">
                   {data.price}{" "}
                   {data.old_price && (
                     <span className="text-gray-400 font-bold line-through text-xs sm:text-sm">
