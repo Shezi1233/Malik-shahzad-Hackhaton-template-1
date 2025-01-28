@@ -39,7 +39,7 @@ export default function Header() {
           ></input>
         </div>
       </div>
-
+     
       {/* cart */}
       <div className="flex items-center mr-7 space-x-5">
         <FaSearchengin className="text-xl ml-2 md:hidden" />

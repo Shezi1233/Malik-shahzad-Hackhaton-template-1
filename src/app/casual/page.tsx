@@ -1,3 +1,4 @@
+"use client"
 import { AccordionDemo } from "@/components/accordion";
 import { CheckboxDemo } from "@/components/checkbox";
 import { Dressstyle } from "@/components/dressstyle";

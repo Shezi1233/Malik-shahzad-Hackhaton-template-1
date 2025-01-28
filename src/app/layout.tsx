@@ -4,6 +4,7 @@ import "./globals.css";
 import Anouce from "@/components/anouncement";
 import Header from "@/components/Header";
 import Footer from "@/components/footer";
+import { CartProvider } from "@/components/cartContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,6 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <CartProvider>
     <html lang="en">
       <body className={inter.className}>
       <Anouce/>
@@ -26,5 +28,6 @@ export default function RootLayout({
         <Footer/>
         </body>
     </html>
+    </CartProvider>
   );
 }
