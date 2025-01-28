@@ -5,10 +5,7 @@ import Anouce from "@/components/anouncement";
 import Header from "@/components/Header";
 import Footer from "@/components/footer";
 import { CartProvider } from "@/components/cartContext";
-import {
-  ClerkProvider,
-  
-} from '@clerk/nextjs'
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+
     <CartProvider>
     <html lang="en">
       <body className={inter.className}>
@@ -37,6 +34,5 @@ export default function RootLayout({
         </body>
     </html>
     </CartProvider>
-    </ClerkProvider>
   );
 }
