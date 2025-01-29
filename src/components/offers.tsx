@@ -1,9 +1,18 @@
+"use client"
+import { motion } from "framer-motion";
 import { MdOutlineEmail } from "react-icons/md";
+import { fadeIn } from "./variants";
 
 export default function Offers() {
   return (
     <main className="w-full flex justify-center items-center  max-w-screen-2xl mx-auto">
-      <div className="w-[80%] h-full sm:h-[150px] bg-black text-white flex flex-col sm:flex-row items-center p-5 rounded-[20px] ">
+      <motion.div 
+       variants={fadeIn("down", 0.2)}
+              initial="hidden"
+              whileInView={"show"}
+              viewport={{ once: false, amount: 0.7 }}
+      
+      className="w-[80%] h-full sm:h-[150px] bg-black text-white flex flex-col sm:flex-row items-center p-5 rounded-[20px] ">
         <h1 className="text-2xl sm:text-4xl font-extrabold">
           STAY UPTO DATE ABOUT OUR LATEST OFFERS
         </h1>
@@ -19,7 +28,7 @@ export default function Offers() {
             <p className="text-black">Subscribe to Newsletter</p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </main>
   );
 }
