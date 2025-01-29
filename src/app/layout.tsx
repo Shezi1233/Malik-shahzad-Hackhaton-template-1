@@ -23,14 +23,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-  if (!publishableKey) {
-    return <div>Error: Missing Clerk Publishable Key</div>;
-  }
+ 
 
   return (
-    <ClerkProvider publishableKey={publishableKey}>
+   
     <CartProvider>
     <html lang="en">
       <body className={inter.className}>
@@ -41,7 +37,6 @@ export default function RootLayout({
         </body>
     </html>
     </CartProvider>
-    </ClerkProvider>
    
   );
 }
