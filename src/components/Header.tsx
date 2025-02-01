@@ -50,12 +50,6 @@ export default function Header() {
           <FaCartShopping className="texl-2xl" />
         </Link>
         <Notifications/>
-        <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
       </div>
     </header>
   );
