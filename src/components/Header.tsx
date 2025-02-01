@@ -4,10 +4,11 @@ import { FaSearchengin } from "react-icons/fa6";
 import Link from "next/link";
 import { SheetSide } from "./sheet";
 import { NavigationMenuDemo } from "./NavigationMenu";
-import { MdOutlinePermIdentity } from "react-icons/md";
 import Notifications from "./notifications";
-import { IoNotifications } from "react-icons/io5";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { IoIosSearch } from "react-icons/io";
+import SearchComponent from "./search";
+
 
 
 export default function Header() {
@@ -40,15 +41,21 @@ export default function Header() {
           ></input>
         </div>
       </div>
+      {/* <SearchComponent/> */}
      
       {/* cart */}
       <div className="flex items-center mr-7 space-x-5">
-        <FaSearchengin className="text-xl ml-2 md:hidden" />
+      <IoIosSearch className="text-xl ml-2 md:hidden" />
         <Link href={"/cart"}>
           <FaCartShopping className="texl-2xl" />
         </Link>
         <Notifications/>
-      
+        <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
       </div>
     </header>
   );

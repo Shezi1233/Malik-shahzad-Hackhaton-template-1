@@ -1,8 +1,10 @@
+
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { FaStar } from "react-icons/fa";
-import { fadeIn } from "./variants";
+import { fadeIn } from "@/components/variants";
+
 
 interface Iproducts {
   title: string;
@@ -76,7 +78,8 @@ let star = [
   <FaStar key={5} />,
 ];
 
-export default function CasualShirts() {
+export default  function CasualShirts() {
+
   return (
     <motion.div
      variants={fadeIn("up", 0.2)}
@@ -95,7 +98,7 @@ export default function CasualShirts() {
               <Link href={`/products/${data.id}`}>
                 <div className="w-full aspect-w-1 aspect-h-1 bg-[#F0EEED] rounded-[20px] overflow-hidden">
                   <Image
-                    src={data.img_url}
+                    src= {data.img_url}
                     alt={data.title}
                     className="object-cover w-full h-full"
                     width={500}

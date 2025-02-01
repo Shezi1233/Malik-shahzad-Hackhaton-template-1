@@ -1,4 +1,5 @@
-import { useState } from "react";
+"use client"
+import { ChangeEvent, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -7,27 +8,54 @@ import {
 } from "@/components/ui/accordion";
 import { Filter } from "lucide-react";
 
-export function AccordionDemo() {
-  const [priceRange, setPriceRange] = useState([0, 1000]); // Price range: [min, max]
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [rating, setRating] = useState<number>(0); // Rating out of 5
+const mockProducts = [
+  { id: 1, name: "Product 1", price: 50, color: "red", size: "M" },
+  { id: 2, name: "Product 2", price: 100, color: "blue", size: "L" },
+  { id: 3, name: "Product 3", price: 150, color: "green", size: "S" },
+  { id: 4, name: "Product 4", price: 75, color: "red", size: "XL" },
+  { id: 5, name: "Product 5", price: 125, color: "blue", size: "M" },
+];
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategories((prevCategories) =>
-      prevCategories.includes(category)
-        ? prevCategories.filter((item) => item !== category)
-        : [...prevCategories, category]
-    );
-  };
+export function FilterComponent() {
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState(mockProducts);
 
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const handlePriceChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const newPriceRange = [...priceRange];
     newPriceRange[index] = parseInt(e.target.value);
     setPriceRange(newPriceRange);
   };
 
-  const handleRatingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRating(parseInt(e.target.value));
+  const handleColorChange = (color: string) => {
+    setSelectedColors((prevColors) =>
+      prevColors.includes(color)
+        ? prevColors.filter((c) => c !== color)
+        : [...prevColors, color]
+    );
+  };
+
+  const handleSizeChange = (size: string) => {
+    setSelectedSizes((prevSizes) =>
+      prevSizes.includes(size)
+        ? prevSizes.filter((s) => s !== size)
+        : [...prevSizes, size]
+    );
+  };
+
+  const applyFilters = () => {
+    const filtered = mockProducts.filter((product) => {
+      const matchesPrice =
+        product.price >= priceRange[0] && product.price <= priceRange[1];
+      const matchesColor =
+        selectedColors.length === 0 || selectedColors.includes(product.color);
+      const matchesSize =
+        selectedSizes.length === 0 || selectedSizes.includes(product.size);
+      return matchesPrice && matchesColor && matchesSize;
+    });
+
+    setFilteredProducts(filtered);
   };
 
   return (
@@ -39,14 +67,13 @@ export function AccordionDemo() {
 
       <Accordion type="single" collapsible className="w-full">
         {/* Price Range Filter */}
-        <AccordionItem value="item-1">
+        <AccordionItem value="price">
           <AccordionTrigger>Price Range</AccordionTrigger>
           <AccordionContent>
             <div className="flex flex-col space-y-4">
               <div>
-                <label htmlFor="minPrice" className="text-sm font-semibold">Min Price: ${priceRange[0]}</label>
+                <label className="text-sm font-semibold">Min: ${priceRange[0]}</label>
                 <input
-                  id="minPrice"
                   type="range"
                   min="0"
                   max="1000"
@@ -56,9 +83,8 @@ export function AccordionDemo() {
                 />
               </div>
               <div>
-                <label htmlFor="maxPrice" className="text-sm font-semibold">Max Price: ${priceRange[1]}</label>
+                <label className="text-sm font-semibold">Max: ${priceRange[1]}</label>
                 <input
-                  id="maxPrice"
                   type="range"
                   min="0"
                   max="1000"
@@ -67,121 +93,71 @@ export function AccordionDemo() {
                   className="w-full"
                 />
               </div>
-              <div className="text-sm text-gray-500">
-                ${priceRange[0]} - ${priceRange[1]}
-              </div>
             </div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* Category Filter */}
-        <AccordionItem value="item-2">
-          <AccordionTrigger>Categories</AccordionTrigger>
+        {/* Color Filter */}
+        <AccordionItem value="color">
+          <AccordionTrigger>Colors</AccordionTrigger>
           <AccordionContent>
-            <div className="flex flex-col space-y-2">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes("electronics")}
-                  onChange={() => handleCategoryChange("electronics")}
-                  className="mr-2"
+            <div className="flex flex-wrap gap-2">
+              {["red", "blue", "green"].map((color) => (
+                <button
+                  key={color}
+                  className={`w-8 h-8 rounded-full ${
+                    selectedColors.includes(color) ? "ring-2 ring-black" : ""
+                  }`}
+                  style={{ backgroundColor: color }}
+                  onClick={() => handleColorChange(color)}
                 />
-                Electronics
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes("clothing")}
-                  onChange={() => handleCategoryChange("clothing")}
-                  className="mr-2"
-                />
-                Clothing
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes("furniture")}
-                  onChange={() => handleCategoryChange("furniture")}
-                  className="mr-2"
-                />
-                Furniture
-              </label>
+              ))}
             </div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* Rating Filter */}
-        <AccordionItem value="item-3">
-          <AccordionTrigger>Rating</AccordionTrigger>
+        {/* Size Filter */}
+        <AccordionItem value="size">
+          <AccordionTrigger>Size</AccordionTrigger>
           <AccordionContent>
-            <div className="flex flex-col space-y-2">
-              <label>
-                <input
-                  type="radio"
-                  value="1"
-                  checked={rating === 1}
-                  onChange={handleRatingChange}
-                  className="mr-2"
-                />
-                1 Star
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="2"
-                  checked={rating === 2}
-                  onChange={handleRatingChange}
-                  className="mr-2"
-                />
-                2 Stars
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="3"
-                  checked={rating === 3}
-                  onChange={handleRatingChange}
-                  className="mr-2"
-                />
-                3 Stars
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="4"
-                  checked={rating === 4}
-                  onChange={handleRatingChange}
-                  className="mr-2"
-                />
-                4 Stars
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="5"
-                  checked={rating === 5}
-                  onChange={handleRatingChange}
-                  className="mr-2"
-                />
-                5 Stars
-              </label>
+            <div className="flex flex-wrap gap-2">
+              {["S", "M", "L", "XL"].map((size) => (
+                <button
+                  key={size}
+                  className={`px-3 py-1 border rounded-md ${
+                    selectedSizes.includes(size) ? "bg-black text-white" : ""
+                  }`}
+                  onClick={() => handleSizeChange(size)}
+                >
+                  {size}
+                </button>
+              ))}
             </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
 
-      {/* Display Selected Filters */}
-      <div className="mt-4">
-        <h2 className="font-semibold">Applied Filters</h2>
-        <div>
-          <strong>Price Range:</strong> ${priceRange[0]} - ${priceRange[1]}
-        </div>
-        <div>
-          <strong>Categories:</strong> {selectedCategories.join(", ") || "None"}
-        </div>
-        <div>
-          <strong>Rating:</strong> {rating > 0 ? `${rating} Stars` : "Any"}
-        </div>
+      {/* Apply Filters Button */}
+      <button
+        className="mt-4 bg-black text-white py-2 px-4 rounded"
+        onClick={applyFilters}
+      >
+        Apply Filter
+      </button>
+
+      {/* Display Filtered Products */}
+      <div className="mt-6">
+        {filteredProducts.length > 0 ? (
+          <ul>
+            {filteredProducts.map((product) => (
+              <li key={product.id} className="border-b py-2">
+                {product.name} - ${product.price}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No products found.</p>
+        )}
       </div>
     </div>
   );

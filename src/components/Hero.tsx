@@ -25,6 +25,20 @@ export default function Hero() {
             Shop Now
           </button>
         </a>
+        <div className="flex justify-between mt-6 gap-4 ">
+          <div className="text-gray-800 font-normal">
+            <span className="text-4xl md:text-5xl">200+</span>
+            <span className="text-sm block">International Brands</span>
+          </div>
+          <div className="text-gray-800 font-normal">
+            <span className="text-4xl md:text-5xl">2,000+</span>
+            <span className="text-sm block">High-Quality Products</span>
+          </div>
+          <div className="text-gray-800 font-normal">
+            <span className="text-4xl md:text-5xl">30,000+</span>
+            <span className="text-sm block">Happy Customers</span>
+          </div>
+        </div>
       </motion.div>
       {/* right */}
       <motion.div

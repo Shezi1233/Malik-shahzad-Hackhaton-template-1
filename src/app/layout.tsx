@@ -9,6 +9,7 @@ import {
   ClerkProvider,
   
 } from '@clerk/nextjs'
+import LoadingBar from "@/components/loading";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,17 +27,20 @@ export default function RootLayout({
  
 
   return (
-   
+    <ClerkProvider>
     <CartProvider>
     <html lang="en">
-      <body className={inter.className}>
+      <body 
+       className={inter.className}>
+      <LoadingBar/>
       <Anouce/>
       <Header/>
         {children}
         <Footer/>
+
         </body>
     </html>
     </CartProvider>
-   
+    </ClerkProvider>
   );
 }
