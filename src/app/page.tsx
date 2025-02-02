@@ -14,7 +14,6 @@ import Chatbot from "@/components/chatbot";
 export default function Home() {
   return (
     <div >
-       
        <Hero/>
        <Fonts/>
        <Products/>
@@ -23,7 +22,7 @@ export default function Home() {
        <Buttons2/>
        <Dress/>
        <CustomerCarousel/>
-       <Chatbot/>
+       {/* <Chatbot/> */}
     </div>  
   );
 }

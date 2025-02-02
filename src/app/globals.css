@@ -1,6 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Root Variables */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -27,7 +29,8 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem}
+    --radius: 0.5rem;
+  }
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -52,15 +55,56 @@
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%}
+    --chart-5: 340 75% 55%;
+  }
 }
+
+/* Apply Global Styles */
 @layer base {
   * {
     @apply border-border;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Ensure consistent spacing */
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden; /* Prevent horizontal scrolling globally */
+  }
+
+  img,
+  video {
+    max-width: 100%; /* Responsive images and videos */
+    height: auto;
+  }
+
+  /* Prevent extra spacing for specific tags */
+  h1, h2, h3, h4, h5, h6, p {
+    margin: 0;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit; /* Ensure links inherit text color */
+  }
+
+  ul, ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+
+  input, textarea {
+    border: none;
+    outline: none;
+    appearance: none;
+    resize: none;
   }
 }
-
-

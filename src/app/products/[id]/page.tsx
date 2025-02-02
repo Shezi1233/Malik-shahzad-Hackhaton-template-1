@@ -162,8 +162,8 @@ let product: Iproducts[] = [
     img2: "/detail2.png",
     img3: "/images/Frame 4.png",
     description: "A sleek black striped t-shirt that adds a subtle edge to your casual look. Perfect for day-to-night wear."
-  }
-  // ... Add remaining product objects here
+  },
+  // Add remaining products here if any
 ];
 
 export default function Pro_Detail() {
@@ -191,9 +191,9 @@ export default function Pro_Detail() {
     <>
       <BreadcrumbDemo />
       <div className="flex flex-col md:flex-row justify-center sm:justify-evenly sm:mt-10 p-5 sm:p-0 max-w-screen-2xl mx-auto">
-        {/* left */}
+        {/* Left */}
         <div className="flex sm:flex-col justify-between items-center w-full sm:w-[152px] order-2 sm:order-1">
-          {/* images */}
+          {/* Images */}
           <LazyLoadImage
             className="w-[100px] sm:w-full h-[100px] sm:h-[150px]"
             src={item.img1}
@@ -216,7 +216,8 @@ export default function Pro_Detail() {
             height={100}
           />
         </div>
-        {/* mid div */}
+
+        {/* Middle */}
         <motion.div
           variants={fadeIn("up", 0.2)}
           initial="hidden"
@@ -232,7 +233,8 @@ export default function Pro_Detail() {
             height={100}
           />
         </motion.div>
-        {/* right div */}
+
+        {/* Right */}
         <motion.div
           variants={fadeIn("down", 0.2)}
           initial="hidden"
@@ -251,7 +253,8 @@ export default function Pro_Detail() {
             <span>{item.old_price ? `$${item.old_price}` : ""}</span>
           </p>
           <p className="mt-8">{item.description}</p>
-          {/* select color */}
+
+          {/* Select Colors */}
           <div className="mt-5">
             <p className="text-gray-500">Select Colors</p>
             <div className="flex space-x-3 mt-2">
@@ -266,6 +269,7 @@ export default function Pro_Detail() {
               </div>
             </div>
           </div>
+
           {/* Choose Size */}
           <div className="mt-4">
             <p className="text-gray-500">Sizes</p>
@@ -284,7 +288,8 @@ export default function Pro_Detail() {
               </div>
             </div>
           </div>
-          {/* BTNS */}
+
+          {/* Add to Cart Button */}
           <div className="flex justify-start items-center mt-8 space-x-4">
             <Button className="mt-10 rounded-full w-[400px]" onClick={handleAddToCart}>Add to Cart</Button>
           </div>
