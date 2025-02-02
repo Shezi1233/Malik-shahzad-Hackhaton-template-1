@@ -5,6 +5,7 @@ import Anouce from "@/components/anouncement";
 import Header from "@/components/Header";
 import Footer from "@/components/footer";
 import { CartProvider } from "@/components/cartContext";
+import LoadingBar from "@/components/loading";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body 
        className={inter.className}>
+        <LoadingBar/>
       <Anouce/>
       <Header/>
         {children}
