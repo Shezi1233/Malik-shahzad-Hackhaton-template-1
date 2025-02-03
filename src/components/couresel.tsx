@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { FaStar } from "react-icons/fa"; // Import FontAwesome icons
 import { FaCircleCheck } from "react-icons/fa6";
 import { Card, CardContent } from "@/components/ui/card";
@@ -53,13 +53,13 @@ const testimonials = [
 export default function CustomerCarousel() {
   return (
     <main className="mt-14">
-      <motion.div 
-       variants={fadeIn("up",0.2)}
-            initial = "hidden"
-            whileInView={"show"}
-            viewport={{once: false , amount: 0.7}}
-
-       className="w-full flex justify-center items-center mt-10 mb-1 max-w-screen-xl mx-auto">
+      <motion.div
+        variants={fadeIn("up", 0.2)}
+        initial="hidden"
+        whileInView={"show"}
+        viewport={{ once: false, amount: 0.7 }}
+        className="w-full flex justify-center items-center mt-10 mb-1 max-w-screen-xl mx-auto"
+      >
         {/* Container */}
         <div className="w-[95%] md:w-[80%] p-3 md:p-0">
           {/* Header */}

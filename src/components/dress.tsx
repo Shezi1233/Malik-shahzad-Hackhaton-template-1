@@ -1,11 +1,11 @@
-"use client"
+"use client";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { fadeIn } from "./variants";
 
 export default function Dress() {
   return (
-    <motion.div 
+    <motion.div
       variants={fadeIn("left", 0.2)}
       initial="hidden"
       whileInView={"show"}

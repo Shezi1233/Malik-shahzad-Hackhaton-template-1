@@ -44,7 +44,10 @@ export default function Cart() {
             <p className="p-4">Your cart is empty</p>
           ) : (
             cart.map((item) => (
-              <div className="flex justify-between mt-4 p-4 border-b" key={item.id}>
+              <div
+                className="flex justify-between mt-4 p-4 border-b"
+                key={item.id}
+              >
                 <div className="flex gap-3">
                   <Image
                     src={item.img_url}
@@ -57,7 +60,9 @@ export default function Cart() {
                     <h3 className="font-bold">{item.title}</h3>
                     <p className="text-sm">Size: {item.size || "N/A"}</p>
                     <p className="text-sm">Color: {item.color || "N/A"}</p>
-                    <p className="font-bold">${Number(item.price).toFixed(2)}</p>
+                    <p className="font-bold">
+                      ${Number(item.price).toFixed(2)}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col justify-between items-center space-y-5">
@@ -114,10 +119,14 @@ export default function Cart() {
               </Button>
             </div>
             <a href="/checkout">
-              <Button className="w-full rounded-full mt-14">Go To Checkout</Button>
+              <Button className="w-full rounded-full mt-14">
+                Go To Checkout
+              </Button>
             </a>
             <a href="/ordertracking">
-              <Button className="w-full rounded-full mt-5">Order Tracking</Button>
+              <Button className="w-full rounded-full mt-5">
+                Order Tracking
+              </Button>
             </a>
           </div>
         </div>

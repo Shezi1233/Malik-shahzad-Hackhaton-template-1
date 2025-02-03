@@ -1,13 +1,11 @@
 
-import { FaCartShopping } from "react-icons/fa6";
 import { FaSearchengin } from "react-icons/fa6";
 import Link from "next/link";
 import { SheetSide } from "./sheet";
 import { NavigationMenuDemo } from "./NavigationMenu";
 import Notifications from "./notifications";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { IoIosSearch } from "react-icons/io";
-import SearchComponent from "./search";
+import { IoCartOutline } from "react-icons/io5";
 
 
 
@@ -47,7 +45,7 @@ export default function Header() {
       <div className="flex items-center mr-7 space-x-5">
       <IoIosSearch className="text-xl ml-2 md:hidden" />
         <Link href={"/cart"}>
-          <FaCartShopping className="texl-2xl" />
+        <IoCartOutline className="text-3xl"/>
         </Link>
         <Notifications/>
       </div>

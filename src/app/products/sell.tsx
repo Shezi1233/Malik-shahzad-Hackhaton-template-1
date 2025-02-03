@@ -61,7 +61,11 @@ export default function Top_sell() {
     >
       {/* Top Selling Header */}
       <div className="flex justify-center items-center mt-8">
-        <img className="mt-12 max-w-full h-auto" src="/images/top.png" alt="TOP SELLING" />
+        <img
+          className="mt-12 max-w-full h-auto"
+          src="/images/top.png"
+          alt="TOP SELLING"
+        />
       </div>
 
       {/* Product Grid */}

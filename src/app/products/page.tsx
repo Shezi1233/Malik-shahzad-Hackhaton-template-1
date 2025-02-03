@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { FaStar } from "react-icons/fa";
@@ -68,7 +68,7 @@ export default function Products() {
           alt="NEW ARRIVALS"
         />
       </div>
-      
+
       {/* Product Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 px-8 mt-10">
         {product.map((data) => {

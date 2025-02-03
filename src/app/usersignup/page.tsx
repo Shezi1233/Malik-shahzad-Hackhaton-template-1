@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState } from "react";
 
 const UserSignup = () => {
@@ -27,7 +27,10 @@ const UserSignup = () => {
       <form onSubmit={handleSubmit}>
         {/* Username Field */}
         <div className="mb-4">
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="username"
+            className="block text-sm font-medium text-gray-700"
+          >
             Username
           </label>
           <input
@@ -43,7 +46,10 @@ const UserSignup = () => {
 
         {/* Email Field */}
         <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
             Email
           </label>
           <input
@@ -59,7 +65,10 @@ const UserSignup = () => {
 
         {/* Password Field */}
         <div className="mb-4">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700"
+          >
             Password
           </label>
           <input

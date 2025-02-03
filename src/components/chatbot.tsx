@@ -3,7 +3,9 @@ import { useState } from "react";
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
+  const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
+    []
+  );
   const [userMessage, setUserMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
@@ -55,7 +57,10 @@ const Chatbot = () => {
         <div className="fixed bottom-4 right-4 w-80 h-96 bg-white rounded-lg shadow-xl flex flex-col">
           <div className="flex justify-between items-center bg-black text-white p-3 rounded-t-lg">
             <span>Chat with us</span>
-            <button onClick={() => setIsOpen(false)} className="text-2xl font-semibold">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-2xl font-semibold"
+            >
               &times;
             </button>
           </div>
@@ -69,7 +74,9 @@ const Chatbot = () => {
               >
                 <div
                   className={`${
-                    msg.sender === "user" ? "bg-black text-white" : "bg-gray-200 text-gray-800"
+                    msg.sender === "user"
+                      ? "bg-black text-white"
+                      : "bg-gray-200 text-gray-800"
                   } p-2 rounded-lg max-w-xs`}
                 >
                   {msg.text}
@@ -94,7 +101,10 @@ const Chatbot = () => {
               placeholder="Type your message..."
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none"
             />
-            <button onClick={handleSendMessage} className="ml-2 bg-black text-white p-2 rounded-lg">
+            <button
+              onClick={handleSendMessage}
+              className="ml-2 bg-black text-white p-2 rounded-lg"
+            >
               Send
             </button>
           </div>

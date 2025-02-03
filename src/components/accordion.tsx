@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { ChangeEvent, useState } from "react";
 import {
   Accordion,
@@ -22,7 +22,10 @@ export function FilterComponent() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [filteredProducts, setFilteredProducts] = useState(mockProducts);
 
-  const handlePriceChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
+  const handlePriceChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const newPriceRange = [...priceRange];
     newPriceRange[index] = parseInt(e.target.value);
     setPriceRange(newPriceRange);
@@ -72,7 +75,9 @@ export function FilterComponent() {
           <AccordionContent>
             <div className="flex flex-col space-y-4">
               <div>
-                <label className="text-sm font-semibold">Min: ${priceRange[0]}</label>
+                <label className="text-sm font-semibold">
+                  Min: ${priceRange[0]}
+                </label>
                 <input
                   type="range"
                   min="0"
@@ -83,7 +88,9 @@ export function FilterComponent() {
                 />
               </div>
               <div>
-                <label className="text-sm font-semibold">Max: ${priceRange[1]}</label>
+                <label className="text-sm font-semibold">
+                  Max: ${priceRange[1]}
+                </label>
                 <input
                   type="range"
                   min="0"

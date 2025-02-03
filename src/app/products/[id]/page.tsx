@@ -67,7 +67,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/product3.png",
-    description: "A trendy checkered shirt for a laid-back, yet stylish look. Made from soft fabric for all-day comfort."
+    description:
+      "A trendy checkered shirt for a laid-back, yet stylish look. Made from soft fabric for all-day comfort.",
   },
   {
     title: "SLEEVE STRIPED T-SHIRT",
@@ -78,7 +79,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/product4.png",
-    description: "This striped t-shirt adds a sporty touch with its bold sleeve design. A versatile piece for any casual occasion."
+    description:
+      "This striped t-shirt adds a sporty touch with its bold sleeve design. A versatile piece for any casual occasion.",
   },
   {
     title: "VERTICAL STRIPED SHIRT",
@@ -89,7 +91,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/images/sell.png",
-    description: "A classic vertical striped shirt that pairs well with both jeans and dress pants. A stylish option for every season."
+    description:
+      "A classic vertical striped shirt that pairs well with both jeans and dress pants. A stylish option for every season.",
   },
   {
     title: "COURAGE GRAPHIC T-SHIRT",
@@ -99,7 +102,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/images/sell2.png",
-    description: "A bold graphic tee featuring an inspiring 'Courage' message. Perfect for making a statement while staying comfortable."
+    description:
+      "A bold graphic tee featuring an inspiring 'Courage' message. Perfect for making a statement while staying comfortable.",
   },
   {
     title: "LOOSE FIT BERMUDA SHORTS",
@@ -109,7 +113,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/images/sell3.png",
-    description: "Relaxed-fit bermuda shorts that are perfect for warm weather. A must-have for comfort during the summer months."
+    description:
+      "Relaxed-fit bermuda shorts that are perfect for warm weather. A must-have for comfort during the summer months.",
   },
   {
     title: "FADED SKINNY JEANS",
@@ -119,7 +124,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/images/sell4.png",
-    description: "Skinny jeans with a trendy faded look, offering a sleek fit and ultimate comfort for daily wear."
+    description:
+      "Skinny jeans with a trendy faded look, offering a sleek fit and ultimate comfort for daily wear.",
   },
   {
     title: "Polo with Contrast Trims",
@@ -130,7 +136,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/images/Frame 1.png",
-    description: "A stylish polo shirt with contrast trims, perfect for both casual and semi-formal occasions. A wardrobe staple."
+    description:
+      "A stylish polo shirt with contrast trims, perfect for both casual and semi-formal occasions. A wardrobe staple.",
   },
   {
     title: "Gradient Graphic T-shirt",
@@ -140,7 +147,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/images/Frame 2.png",
-    description: "A modern graphic tee featuring a gradient design, adding a pop of color and creativity to your outfit."
+    description:
+      "A modern graphic tee featuring a gradient design, adding a pop of color and creativity to your outfit.",
   },
   {
     title: "Polo with Tipping Details",
@@ -150,7 +158,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/images/Frame 3.png",
-    description: "A polo shirt with tipping details along the collar and sleeves for a refined, sporty look."
+    description:
+      "A polo shirt with tipping details along the collar and sleeves for a refined, sporty look.",
   },
   {
     title: "Black Striped T-shirt",
@@ -161,7 +170,8 @@ let product: Iproducts[] = [
     img1: "/detail1.png",
     img2: "/detail2.png",
     img3: "/images/Frame 4.png",
-    description: "A sleek black striped t-shirt that adds a subtle edge to your casual look. Perfect for day-to-night wear."
+    description:
+      "A sleek black striped t-shirt that adds a subtle edge to your casual look. Perfect for day-to-night wear.",
   },
   // Add remaining products here if any
 ];
@@ -291,7 +301,12 @@ export default function Pro_Detail() {
 
           {/* Add to Cart Button */}
           <div className="flex justify-start items-center mt-8 space-x-4">
-            <Button className="mt-10 rounded-full w-[400px]" onClick={handleAddToCart}>Add to Cart</Button>
+            <Button
+              className="mt-10 rounded-full w-[400px]"
+              onClick={handleAddToCart}
+            >
+              Add to Cart
+            </Button>
           </div>
         </motion.div>
       </div>

@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const Checkout = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    country: '',
-    paymentMethod: 'creditCard', // Default payment method
+    name: "",
+    email: "",
+    address: "",
+    city: "",
+    postalCode: "",
+    country: "",
+    paymentMethod: "creditCard", // Default payment method
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderConfirmed, setOrderConfirmed] = useState(false);
 
@@ -48,7 +48,9 @@ const Checkout = () => {
     return (
       <div className="flex justify-center items-center p-6">
         <div className="bg-green-100 p-8 rounded-lg shadow-lg text-center">
-          <h2 className="text-xl font-semibold text-green-600">Order Confirmed!</h2>
+          <h2 className="text-xl font-semibold text-green-600">
+            Order Confirmed!
+          </h2>
           <p>Your order has been successfully placed.</p>
         </div>
       </div>
@@ -61,7 +63,10 @@ const Checkout = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700"
+          >
             Name
           </label>
           <input
@@ -76,7 +81,10 @@ const Checkout = () => {
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
             Email
           </label>
           <input
@@ -91,7 +99,10 @@ const Checkout = () => {
         </div>
 
         <div>
-          <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="address"
+            className="block text-sm font-medium text-gray-700"
+          >
             Address
           </label>
           <input
@@ -107,7 +118,10 @@ const Checkout = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="city"
+              className="block text-sm font-medium text-gray-700"
+            >
               City
             </label>
             <input
@@ -122,7 +136,10 @@ const Checkout = () => {
           </div>
 
           <div>
-            <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="postalCode"
+              className="block text-sm font-medium text-gray-700"
+            >
               Postal Code
             </label>
             <input
@@ -138,7 +155,10 @@ const Checkout = () => {
         </div>
 
         <div>
-          <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="country"
+            className="block text-sm font-medium text-gray-700"
+          >
             Country
           </label>
           <input
@@ -153,7 +173,10 @@ const Checkout = () => {
         </div>
 
         <div>
-          <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="paymentMethod"
+            className="block text-sm font-medium text-gray-700"
+          >
             Payment Method
           </label>
           <select
@@ -173,7 +196,7 @@ const Checkout = () => {
           disabled={isSubmitting}
           className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
         >
-          {isSubmitting ? 'Processing...' : 'Confirm Order'}
+          {isSubmitting ? "Processing..." : "Confirm Order"}
         </button>
       </form>
     </div>

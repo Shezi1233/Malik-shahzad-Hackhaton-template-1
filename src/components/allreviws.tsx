@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Check } from "lucide-react";
 import { FaStar } from "react-icons/fa6";
 import { Button } from "./ui/buttons";
@@ -69,12 +69,12 @@ export default function AllReviw() {
     <main className=" max-w-screen-2xl mx-auto">
       {/* top */}
       <motion.div
-       variants={fadeIn("up",0.2)}
-            initial = "hidden"
-            whileInView={"show"}
-            viewport={{once: false , amount: 0.7}}
-      
-      className="px-5 flex justify-between">
+        variants={fadeIn("up", 0.2)}
+        initial="hidden"
+        whileInView={"show"}
+        viewport={{ once: false, amount: 0.7 }}
+        className="px-5 flex justify-between"
+      >
         <h1 className="text-2xl">All Reviws</h1>
         <div className="space-x-3">
           <Button variant={"outline"} className="hidden md:block">
@@ -85,11 +85,11 @@ export default function AllReviw() {
       </motion.div>
       {/* container */}
       <motion.div
-       variants={fadeIn("left",0.2)}
-       initial = "hidden"
-       whileInView={"show"}
-       viewport={{once: false , amount: 0.7}}>
-        
+        variants={fadeIn("left", 0.2)}
+        initial="hidden"
+        whileInView={"show"}
+        viewport={{ once: false, amount: 0.7 }}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 mt-3 md:mt-0">
           {Review.map((data, i) => {
             return (
