@@ -1,31 +1,32 @@
 "use client"
+
 import { useState } from "react";
+import { api } from "@/lib/api";
+
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+}
 
 const SearchComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults] = useState<{ id: number; name: string; price: number }[]>([]);
+  const [results, setResults] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
 
-  // Mock product list
-  const products = [
-    { id: 1, name: "T-SHIRT WITH TAPE DETAILS", price: 140 },
-    { id: 2, name: "SKINNY FIT JEANS", price: 120 },
-    { id: 3, name: "HECKERED SHIRT", price: 120 },
-    { id: 4, name: "SLEEVE STRIPED T-SHIRT", price: 120 },
-    { id: 5, name: "VERTICAL STRIPED SHIRT", price: 212 },
-    { id: 6, name: "OURAGE GRAPHIC T-SHIRT", price: 145 },
-    { id: 7, name: "LOOSE FIT BERMUDA SHORTS", price: 80 },
-    { id: 8, name: "FADED SKINNY JEANS", price: 210 },
-    { id: 9, name: "Polo with Contrast Trims", price: 212 },
-    { id: 10, name: "Gradient Graphic T-shirt", price: 145 },
-    { id: 11, name: "Polo with Tipping Details", price: 180 },
-    { id: 12, name: "Black Striped T-shirt", price: 120 },
-  ];
-
-  const handleSearch = () => {
-    const filteredResults = products.filter((product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setResults(filteredResults);
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) return;
+    setLoading(true);
+    setSearched(true);
+    try {
+      const data = await api.get<{ products: Product[]; total: number }>(`/products/search?q=${encodeURIComponent(searchTerm)}`);
+      setResults(data.products || []);
+    } catch (e) {
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -37,32 +38,30 @@ const SearchComponent = () => {
           placeholder="Search for a product..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           className="border rounded-md p-2 w-full"
         />
         <button
           onClick={handleSearch}
-          className="bg-black text-white px-4 py-2 rounded-md"
+          disabled={loading}
+          className="bg-black text-white px-4 py-2 rounded-md disabled:bg-gray-400"
         >
-          Search
+          {loading ? "Searching..." : "Search"}
         </button>
       </div>
 
-      {/* Search Results */}
       <div>
         {results.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {results.map((product) => (
-              <div
-                key={product.id}
-                className="border p-4 rounded-md shadow-md"
-              >
-                <h2 className="font-semibold">{product.name}</h2>
+              <div key={product.id} className="border p-4 rounded-md shadow-md">
+                <h2 className="font-semibold">{product.title}</h2>
                 <p>Price: ${product.price}</p>
               </div>
             ))}
           </div>
         ) : (
-          searchTerm && (
+          searched && !loading && (
             <p className="text-red-500 font-medium">Product not found!</p>
           )
         )}

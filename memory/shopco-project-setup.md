@@ -1,0 +1,1 @@
+- [shopco-project-setup](shopco-project-setup.md) — Project structure, tech stack, env config, chatbot RAG setup

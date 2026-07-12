@@ -1,109 +1,84 @@
 "use client";
-import { fadeIn } from "@/components/variants";
+
 import { motion } from "framer-motion";
-import Image from "next/image";
-import Link from "next/link";
-import { FaStar } from "react-icons/fa";
+import { fadeIn } from "@/components/variants";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
+import ProductCard, { ProductCardSkeleton } from "@/components/ProductCard";
 
 interface Iproducts {
   title: string;
-  price: string;
+  price: number;
   id: number;
-  rating?: string;
-  old_price?: string;
+  old_price?: number | null;
   img_url: string;
+  rating: number;
 }
 
-let product: Iproducts[] = [
-  {
-    title: "VERTICAL STRIPED SHIRT",
-    id: 5,
-    price: "$212",
-    img_url: "/images/sell.png",
-    old_price: "$223",
-  },
-  {
-    title: "COURAGE GRAPHIC T-SHIRT",
-    id: 6,
-    price: "$145",
-    img_url: "/images/sell2.png",
-  },
-  {
-    title: "LOOSE FIT BERMUDA SHORTS",
-    id: 7,
-    price: "$80",
-    img_url: "/images/sell3.png",
-  },
-  {
-    title: "FADED SKINNY JEANS",
-    id: 8,
-    price: "$210",
-    img_url: "/images/sell4.png",
-  },
-];
-
-let star = [
-  <FaStar key={1} />,
-  <FaStar key={2} />,
-  <FaStar key={3} />,
-  <FaStar key={4} />,
-  <FaStar key={5} />,
-];
-
 export default function Top_sell() {
+  const [products, setProducts] = useState<Iproducts[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get<any>("/products?category=top_selling")
+      .then((data) => setProducts(data.products || data))
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <motion.div
       variants={fadeIn("down", 0.2)}
-      initial="hidden"
+      initial="show"
       whileInView={"show"}
-      viewport={{ once: false, amount: 0.7 }}
-      className="w-full h-full sm:h-[500px] mt-10"
+      viewport={{ once: false, amount: 0.1 }}
+      className="w-full max-w-screen-2xl mx-auto mt-10 px-4 sm:px-8"
     >
-      {/* Top Selling Header */}
-      <div className="flex justify-center items-center mt-8">
+      {/* Section Heading */}
+      <div className="flex justify-center items-center mb-6">
         <img
-          className="mt-12 max-w-full h-auto"
+          className="max-w-full h-auto"
           src="/images/top.png"
           alt="TOP SELLING"
         />
       </div>
 
-      {/* Product Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 px-8 mt-10">
-        {product.map((data) => {
-          return (
-            <div key={data.id} className="flex flex-col items-center">
-              <Link href={`/products/${data.id}`}>
-                <div className="w-full h-[250px] sm:h-[300px] md:h-[350px] bg-[#F0EEED] rounded-[20px] overflow-hidden">
-                  <Image
-                    src={data.img_url}
-                    alt={data.title}
-                    className="w-full h-full object-cover"
-                    width={300}
-                    height={300}
-                  />
-                </div>
-              </Link>
-              <div className="text-center mt-2">
-                <p className="text-sm sm:text-lg font-bold">{data.title}</p>
-                <div className="flex justify-center text-yellow-400 mt-1">
-                  {star.map((icon, index) => (
-                    <span key={index}>{icon}</span>
-                  ))}
-                </div>
-                <p className="font-bold mt-2 text-sm sm:text-base">
-                  {data.price}{" "}
-                  {data.old_price && (
-                    <span className="text-gray-400 font-bold line-through text-xs sm:text-sm">
-                      {" "}
-                      {data.old_price}
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+      {/* Products Grid */}
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+          {[...Array(4)].map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-20">
+          <p className="text-gray-400 text-lg">No products available.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+          {products.map((data) => (
+            <ProductCard
+              key={data.id}
+              id={data.id}
+              title={data.title}
+              price={data.price}
+              old_price={data.old_price}
+              img_url={data.img_url}
+              rating={data.rating}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* View All Link */}
+      <div className="flex justify-center mt-8">
+        <a
+          href="/products/all"
+          className="px-16 py-3 border border-gray-300 rounded-full text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+        >
+          View All
+        </a>
       </div>
     </motion.div>
   );

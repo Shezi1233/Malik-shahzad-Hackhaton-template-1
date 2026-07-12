@@ -15,7 +15,14 @@ export default function Dress() {
       {/* top div */}
       <div className="mt-8 mb-5">
         {/* <h1 className="text-5xl my-6 font-black pl-6 sm:pl-0">BROWSE BY DRESS STYLE</h1> */}
-        <img className="" src="/images/style.png" alt="style" />
+        <Image
+          className="max-w-full h-auto"
+          src="/images/style.png"
+          alt="style"
+          width={400}
+          height={60}
+          priority={false}
+        />
       </div>
 
       {/* bottom div */}

@@ -27,6 +27,23 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+
+# backend - deployed separately on Hugging Face
+/backend/
+
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+backend/.venv/
+
+# backend database
+backend/*.db
+backend/*.sqlite3
 
 # vercel
 .vercel

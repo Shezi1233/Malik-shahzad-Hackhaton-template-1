@@ -1,19 +1,20 @@
 "use client";
+
 import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/buttons";
-import { Check, Minus, Plus } from "lucide-react";
+import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 import AllReviw from "@/components/allreviws";
 import Tshirts from "@/components/products";
 import { BreadcrumbDemo } from "@/components/Bredcrupm";
 import Chatbot from "@/components/chatbot";
-import LazyLoadImage from "@/components/lazyload";
 import { motion } from "framer-motion";
 import { fadeIn } from "@/components/variants";
 import { useCart } from "@/components/cartContext";
+import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
 
-// Adding key prop in star array
 let star = [
   <FaStar key={1} />,
   <FaStar key={2} />,
@@ -22,293 +23,338 @@ let star = [
   <FaStar key={5} />,
 ];
 
-interface Iproducts {
-  title: string;
-  price: number; // Changed price to number
+interface IProduct {
   id: number;
-  rating?: string;
-  old_price?: number;
-  description: string;
+  title: string;
+  price: number;
+  old_price?: number | null;
   img_url: string;
-  img1: string;
-  img2: string;
-  img3: string;
+  img1?: string | null;
+  img2?: string | null;
+  img3?: string | null;
+  description: string;
+  colors: string[];
+  sizes: string[];
+  rating: number;
 }
 
-let product: Iproducts[] = [
-  {
-    title: "T-SHIRT WITH TAPE DETAILS",
-    id: 1,
-    price: 140,
-    img_url: "/product1.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/product1.png",
-    description:
-      "A stylish t-shirt with unique tape detailing along the shoulders. Perfect for a casual day out.",
-  },
-  {
-    title: "SKINNY FIT JEANS",
-    id: 2,
-    price: 120,
-    old_price: 200,
-    img_url: "/product2.png",
-    img1: "/product2.png",
-    img2: "/detail2.png",
-    img3: "/product2.png",
-    description:
-      "Slim-fit jeans with a flattering cut and comfortable stretch. A great pair to complement your casual wardrobe.",
-  },
-  {
-    title: "CHECKERED SHIRT",
-    id: 3,
-    price: 120,
-    img_url: "/product3.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/product3.png",
-    description:
-      "A trendy checkered shirt for a laid-back, yet stylish look. Made from soft fabric for all-day comfort.",
-  },
-  {
-    title: "SLEEVE STRIPED T-SHIRT",
-    id: 4,
-    price: 120,
-    old_price: 200,
-    img_url: "/product4.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/product4.png",
-    description:
-      "This striped t-shirt adds a sporty touch with its bold sleeve design. A versatile piece for any casual occasion.",
-  },
-  {
-    title: "VERTICAL STRIPED SHIRT",
-    id: 5,
-    price: 212,
-    old_price: 232,
-    img_url: "/images/sell.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/images/sell.png",
-    description:
-      "A classic vertical striped shirt that pairs well with both jeans and dress pants. A stylish option for every season.",
-  },
-  {
-    title: "COURAGE GRAPHIC T-SHIRT",
-    id: 6,
-    price: 145,
-    img_url: "/images/sell2.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/images/sell2.png",
-    description:
-      "A bold graphic tee featuring an inspiring 'Courage' message. Perfect for making a statement while staying comfortable.",
-  },
-  {
-    title: "LOOSE FIT BERMUDA SHORTS",
-    id: 7,
-    price: 80,
-    img_url: "/images/sell3.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/images/sell3.png",
-    description:
-      "Relaxed-fit bermuda shorts that are perfect for warm weather. A must-have for comfort during the summer months.",
-  },
-  {
-    title: "FADED SKINNY JEANS",
-    id: 8,
-    price: 210,
-    img_url: "/images/sell4.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/images/sell4.png",
-    description:
-      "Skinny jeans with a trendy faded look, offering a sleek fit and ultimate comfort for daily wear.",
-  },
-  {
-    title: "Polo with Contrast Trims",
-    id: 9,
-    price: 212,
-    old_price: 242,
-    img_url: "/images/Frame 1.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/images/Frame 1.png",
-    description:
-      "A stylish polo shirt with contrast trims, perfect for both casual and semi-formal occasions. A wardrobe staple.",
-  },
-  {
-    title: "Gradient Graphic T-shirt",
-    id: 10,
-    price: 145,
-    img_url: "/images/Frame 2.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/images/Frame 2.png",
-    description:
-      "A modern graphic tee featuring a gradient design, adding a pop of color and creativity to your outfit.",
-  },
-  {
-    title: "Polo with Tipping Details",
-    id: 11,
-    price: 180,
-    img_url: "/images/Frame 3.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/images/Frame 3.png",
-    description:
-      "A polo shirt with tipping details along the collar and sleeves for a refined, sporty look.",
-  },
-  {
-    title: "Black Striped T-shirt",
-    id: 12,
-    price: 120,
-    old_price: 150,
-    img_url: "/images/Frame 4.png",
-    img1: "/detail1.png",
-    img2: "/detail2.png",
-    img3: "/images/Frame 4.png",
-    description:
-      "A sleek black striped t-shirt that adds a subtle edge to your casual look. Perfect for day-to-night wear.",
-  },
-  // Add remaining products here if any
-];
+/** Check if two image URLs likely point to different files */
+function isDifferentImage(a: string, b: string) {
+  if (!a || !b) return false;
+  const nameA = a.split("/").pop() || a;
+  const nameB = b.split("/").pop() || b;
+  return nameA !== nameB;
+}
+
+function ProductImage({
+  src,
+  alt,
+  className = "",
+  width = 580,
+  height = 580,
+  priority = false,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  width?: number;
+  height?: number;
+  priority?: boolean;
+}) {
+  const [error, setError] = useState(false);
+
+  if (error) {
+    return (
+      <div
+        className={`flex flex-col items-center justify-center text-gray-400 bg-gray-100 ${className}`}
+      >
+        <svg className="w-10 h-10 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
+        </svg>
+        <span className="text-xs">No image</span>
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      className={className}
+      width={width}
+      height={height}
+      priority={priority}
+      unoptimized
+      onError={() => setError(true)}
+    />
+  );
+}
 
 export default function Pro_Detail() {
   const params = useParams();
-  const { addToCart } = useCart(); // Importing the addToCart function from useCart
-  const id = params.id; // dynamic id
-  const item = product.find((item) => item.id === Number(id));
+  const { addToCart } = useCart();
+  const [product, setProduct] = useState<IProduct | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedColor, setSelectedColor] = useState<string>("");
+  const [quantity, setQuantity] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>("");
 
-  if (!item) {
-    return <h1>Product not found</h1>;
+  useEffect(() => {
+    if (!params.id) return;
+    const productId = Number(params.id);
+    api
+      .get<IProduct>(`/products/${productId}`)
+      .then((data) => {
+        setProduct(data);
+        // Always default to img_url — it's the most reliable image
+        setSelectedImage(data.img_url);
+      })
+      .catch(() => setProduct(null))
+      .finally(() => setLoading(false));
+  }, [params.id]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
+          <span className="text-gray-400 text-sm">Loading product...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Product not found
+          </h1>
+          <p className="text-gray-400">
+            The product you&apos;re looking for doesn&apos;t exist or has been
+            removed.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const handleAddToCart = () => {
     addToCart({
-      id: item.id,
-      title: item.title,
-      price: item.price,
-      img_url: item.img_url,
-      quantity: 1, // Default quantity
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      img_url: product.img_url,
+      quantity: quantity,
+      size: selectedSize,
+      color: selectedColor,
     });
-    alert(`${item.title} added to cart`);
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
   };
+
+  // Only include thumbnails that are DIFFERENT from each other
+  const allImages = [product.img_url, product.img1, product.img2, product.img3].filter(
+    (img): img is string => !!img
+  );
+  const thumbnails = allImages.filter(
+    (img, i) => i === 0 || isDifferentImage(img, allImages[0])
+  ).slice(0, 4);
 
   return (
     <>
       <BreadcrumbDemo />
-      <div className="flex flex-col md:flex-row justify-center sm:justify-evenly sm:mt-10 p-5 sm:p-0 max-w-screen-2xl mx-auto">
-        {/* Left */}
-        <div className="flex sm:flex-col justify-between items-center w-full sm:w-[152px] order-2 sm:order-1">
-          {/* Images */}
-          <LazyLoadImage
-            className="w-[100px] sm:w-full h-[100px] sm:h-[150px]"
-            src={item.img1}
-            alt="product detail"
-            width={100}
-            height={100}
-          />
-          <LazyLoadImage
-            src={item.img2}
-            className="w-[100px] sm:w-full h-[100px] sm:h-[150px] sm:mt-3"
-            alt="product detail"
-            width={100}
-            height={100}
-          />
-          <LazyLoadImage
-            src={item.img3}
-            className="w-[100px] sm:w-full h-[100px] sm:h-[150px] sm:mt-3"
-            alt="product detail"
-            width={100}
-            height={100}
-          />
-        </div>
-
-        {/* Middle */}
-        <motion.div
-          variants={fadeIn("up", 0.2)}
-          initial="hidden"
-          whileInView={"show"}
-          viewport={{ once: false, amount: 0.7 }}
-          className="w-full sm:w-[444px] h-[260px] sm:h-[500px] mt-5 sm:mt-0 order-1 sm:order-2"
-        >
-          <Image
-            src={item.img3}
-            alt="product detail"
-            className="w-full h-[95%]"
-            width={100}
-            height={100}
-          />
-        </motion.div>
-
-        {/* Right */}
-        <motion.div
-          variants={fadeIn("down", 0.2)}
-          initial="hidden"
-          whileInView={"show"}
-          viewport={{ once: false, amount: 0.7 }}
-          className="w-full sm:w-[600px] h-[500px] mt-3 order-3"
-        >
-          <h1 className="text-2xl md:text-3xl font-bold">{item.title}</h1>
-          <div className="flex text-yellow-400">
-            {star.map((icon, index) => (
-              <span key={index}>{icon}</span>
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-8 py-6">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Thumbnails */}
+          <div className="order-2 lg:order-1 flex lg:flex-col gap-3 justify-center">
+            {thumbnails.map((img, i) => (
+              <button
+                key={i}
+                onClick={() => setSelectedImage(img)}
+                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-[14px] overflow-hidden border-2 transition-all flex-shrink-0 ${
+                  selectedImage === img
+                    ? "border-black ring-1 ring-black"
+                    : "border-transparent hover:border-gray-300"
+                }`}
+              >
+                <ProductImage
+                  src={img}
+                  alt={`${product.title} ${i + 1}`}
+                  className="w-full h-full object-cover"
+                  width={80}
+                  height={80}
+                />
+              </button>
             ))}
           </div>
-          <p className="font-bold mt-1">
-            ${item.price}{" "}
-            <span>{item.old_price ? `$${item.old_price}` : ""}</span>
-          </p>
-          <p className="mt-8">{item.description}</p>
 
-          {/* Select Colors */}
-          <div className="mt-5">
-            <p className="text-gray-500">Select Colors</p>
-            <div className="flex space-x-3 mt-2">
-              <div className="w-[37px] h-[37px] bg-[#4F4631] rounded-full flex justify-center items-center">
-                <Check className="text-white opacity-0 hover:opacity-100 cursor-pointer" />
+          {/* Main Image */}
+          <motion.div
+            variants={fadeIn("up", 0.2)}
+            initial="hidden"
+            whileInView={"show"}
+            viewport={{ once: false, amount: 0.7 }}
+            className="order-1 lg:order-2 w-full lg:w-[500px] xl:w-[580px] aspect-square bg-[#F0EEED] rounded-[20px] overflow-hidden"
+          >
+            <ProductImage
+              src={selectedImage}
+              alt={product.title}
+              className="w-full h-full object-contain"
+              width={580}
+              height={580}
+              priority
+            />
+          </motion.div>
+
+          {/* Product Details */}
+          <motion.div
+            variants={fadeIn("down", 0.2)}
+            initial="hidden"
+            whileInView={"show"}
+            viewport={{ once: false, amount: 0.7 }}
+            className="order-3 flex-1 min-w-0"
+          >
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
+              {product.title}
+            </h1>
+
+            {/* Rating */}
+            <div className="flex items-center gap-1 mt-3">
+              <div className="flex text-yellow-400">
+                {star.map((icon, index) => (
+                  <span key={index} className="text-sm">{icon}</span>
+                ))}
               </div>
-              <div className="w-[37px] h-[37px] bg-[#314F4A] rounded-full flex justify-center items-center">
-                <Check className="text-white opacity-0 hover:opacity-100 cursor-pointer" />
-              </div>
-              <div className="w-[37px] h-[37px] bg-[#31344F] rounded-full flex justify-center items-center">
-                <Check className="text-white opacity-0 hover:opacity-100 cursor-pointer" />
-              </div>
+              <span className="text-gray-500 text-sm ml-2">
+                {product.rating}/5
+              </span>
             </div>
-          </div>
 
-          {/* Choose Size */}
-          <div className="mt-4">
-            <p className="text-gray-500">Sizes</p>
-            <div className="flex space-x-3 mt-2">
-              <div className="w-[80px] h-[40px] flex justify-center items-center rounded-[62px] bg-black text-white">
-                <button>Small</button>
-              </div>
-              <div className="w-[90px] h-[40px] flex justify-center items-center rounded-[62px] bg-black text-white">
-                <button>Medium</button>
-              </div>
-              <div className="w-[80px] h-[40px] flex justify-center items-center rounded-[62px] bg-black text-white">
-                <button>Large</button>
-              </div>
-              <div className="w-[90px] h-[40px] flex justify-center items-center rounded-[62px] bg-black text-white">
-                <button>X-Large</button>
-              </div>
+            {/* Price */}
+            <div className="flex items-center gap-3 mt-4">
+              <p className="text-2xl md:text-3xl font-bold text-gray-900">
+                ${product.price}
+              </p>
+              {product.old_price && (
+                <>
+                  <p className="text-lg md:text-xl text-gray-400 line-through">
+                    ${product.old_price}
+                  </p>
+                  <span className="bg-red-50 text-red-500 text-sm px-2.5 py-0.5 rounded-full font-medium">
+                    -
+                    {Math.round(
+                      ((product.old_price - product.price) /
+                        product.old_price) *
+                        100
+                    )}
+                    %
+                  </span>
+                </>
+              )}
             </div>
-          </div>
 
-          {/* Add to Cart Button */}
-          <div className="flex justify-start items-center mt-8 space-x-4">
-            <Button
-              className="mt-10 rounded-full w-[400px]"
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </Button>
-          </div>
-        </motion.div>
+            <p className="mt-6 text-gray-600 leading-relaxed">
+              {product.description}
+            </p>
+
+            <hr className="my-6 border-gray-200" />
+
+            {/* Select Colors */}
+            {product.colors && product.colors.length > 0 && (
+              <div className="mb-6">
+                <p className="text-sm text-gray-500 mb-3">
+                  Select Colors{" "}
+                  <span className="text-black font-medium">
+                    {selectedColor && `— ${selectedColor}`}
+                  </span>
+                </p>
+                <div className="flex space-x-3">
+                  {product.colors.map((color, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedColor(color)}
+                      className={`w-[37px] h-[37px] rounded-full flex justify-center items-center transition-all ${
+                        selectedColor === color
+                          ? "ring-2 ring-black ring-offset-2 scale-110"
+                          : ""
+                      }`}
+                      style={{ backgroundColor: color }}
+                    >
+                      {selectedColor === color && (
+                        <Check className="text-white w-4 h-4" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Choose Size */}
+            {product.sizes && product.sizes.length > 0 && (
+              <div className="mb-6">
+                <p className="text-sm text-gray-500 mb-3">
+                  Choose Size{" "}
+                  <span className="text-black font-medium">
+                    {selectedSize && `— ${selectedSize}`}
+                  </span>
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${
+                        selectedSize === size
+                          ? "bg-black text-white shadow-md"
+                          : "bg-[#F0F0F0] text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity + Add to Cart */}
+            <div className="flex items-center gap-4 mt-8">
+              <div className="flex items-center gap-4 bg-[#F0F0F0] rounded-full px-4 py-2.5">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="hover:text-black text-gray-500 transition-colors"
+                >
+                  <Minus size={18} />
+                </button>
+                <span className="font-medium w-8 text-center">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="hover:text-black text-gray-500 transition-colors"
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+
+              <Button
+                className={`flex-1 rounded-full py-6 text-base font-medium transition-all ${
+                  addedToCart ? "bg-green-600 hover:bg-green-700" : ""
+                }`}
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart size={18} className="mr-2" />
+                {addedToCart ? "Added!" : "Add to Cart"}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
       </div>
       <AllReviw />
       <Tshirts />

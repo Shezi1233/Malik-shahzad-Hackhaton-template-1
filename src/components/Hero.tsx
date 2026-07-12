@@ -14,17 +14,20 @@ export default function Hero() {
         viewport={{ once: false, amount: 0.7 }}
         className="w-full md:max-w-[50%] mt-3 md:mt-10 md:ml-10 px-4 md:px-6"
       >
-        <img
-          className="mt-7 mb-6 max-w-full"
+        <Image
+          className="mt-7 mb-6 max-w-full h-auto"
           src="/images/Hero.png"
           alt="Hero"
+          width={600}
+          height={200}
+          priority
         />
         <p className="text-sm md:mt-3 text-gray-600">
           Browse through our diverse range of meticulously crafted garments,
           designed to bring out your individuality and cater to your sense of
           style.
         </p>
-        <a href="casual">
+        <a href="/casual">
           <button className="bg-black py-2 px-8 rounded-full mt-4 text-white text-sm">
             Shop Now
           </button>
