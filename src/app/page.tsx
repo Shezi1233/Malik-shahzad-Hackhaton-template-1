@@ -59,18 +59,7 @@ export default function Home() {
 
       {/* Lazy loaded below-fold sections */}
       <Products />
-      <div className="flex justify-center items-center mt-20">
-        <a href="/products/all" className="px-16 py-3 border border-gray-300 rounded-full text-gray-600 font-medium hover:bg-gray-50 transition-colors">
-          View All
-        </a>
-      </div>
-
       <TopSell />
-      <div className="flex justify-center items-center mt-10">
-        <a href="/products/all" className="px-16 py-3 border border-gray-300 rounded-full text-gray-600 font-medium hover:bg-gray-50 transition-colors">
-          View All
-        </a>
-      </div>
 
       <Dress />
       <CustomerCarousel />
