@@ -7,13 +7,6 @@ from fastapi.staticfiles import StaticFiles
 from app.database import Base, SessionLocal, engine
 from app.models import CartItem, Notification, Order, OrderItem, Product, User
 from app.routers import admin, cart, chatbot, notifications, orders, products, users
-from app.seed import seed_database
-
-# Create all tables
-Base.metadata.create_all(bind=engine)
-
-# Seed initial data
-seed_database()
 
 app = FastAPI(title="SHOP.CO API", version="1.0.0")
 
@@ -43,7 +36,15 @@ app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 @app.on_event("startup")
 def startup():
-    """Initialize RAG engine in background thread so server starts fast."""
+    """Initialize database tables, seed data, and RAG engine on startup."""
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+
+    # Seed initial data
+    from app.seed import seed_database
+    seed_database()
+
+    # Initialize RAG engine in background thread so server starts fast
     def _init_rag():
         from app.routers.chatbot import index_products, init_rag_engine
         init_rag_engine()
