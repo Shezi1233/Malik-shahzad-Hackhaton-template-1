@@ -37,22 +37,27 @@ app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 @app.on_event("startup")
 def startup():
     """Initialize database tables, seed data, and RAG engine on startup."""
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
+    # Create all tables and seed — wrapped so app starts even if DB is slow
+    try:
+        Base.metadata.create_all(bind=engine)
+        from app.seed import seed_database
+        seed_database()
+        print("Database initialized and seeded successfully!")
+    except Exception as e:
+        print(f"WARNING: Database init failed (will retry on first request): {e}")
 
-    # Seed initial data
-    from app.seed import seed_database
-    seed_database()
-
-    # Initialize RAG engine in background thread so server starts fast
+    # Initialize RAG engine in background thread
     def _init_rag():
-        from app.routers.chatbot import index_products, init_rag_engine
-        init_rag_engine()
-        db = SessionLocal()
         try:
-            index_products(db)
-        finally:
-            db.close()
+            from app.routers.chatbot import index_products, init_rag_engine
+            init_rag_engine()
+            db = SessionLocal()
+            try:
+                index_products(db)
+            finally:
+                db.close()
+        except Exception as e:
+            print(f"WARNING: RAG init failed: {e}")
     threading.Thread(target=_init_rag, daemon=True).start()
 
 
