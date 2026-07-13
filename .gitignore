@@ -29,9 +29,6 @@ yarn-error.log*
 .env*.local
 .env
 
-# backend - deployed separately on Hugging Face
-/backend/
-
 # python
 __pycache__/
 *.py[cod]
@@ -39,11 +36,6 @@ __pycache__/
 *.so
 .Python
 .venv
-backend/.venv/
-
-# backend database
-backend/*.db
-backend/*.sqlite3
 
 # vercel
 .vercel

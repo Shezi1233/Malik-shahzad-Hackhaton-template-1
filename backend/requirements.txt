@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+pydantic-settings
+python-jose
+passlib
+python-multipart
+bcrypt
+google-generativeai
+qdrant-client
+psycopg2-binary
+httpx
