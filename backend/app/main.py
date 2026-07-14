@@ -14,10 +14,12 @@ from app.routers import admin, cart, chatbot, notifications, orders, products, u
 
 app = FastAPI(title="SHOP.CO API", version="1.0.0")
 
-# CORS - allow Next.js frontend (any port)
+# CORS - allow Next.js frontend (any port) + production Vercel domain
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "*",  # Allow all origins (including localhost dev servers)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

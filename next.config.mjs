@@ -18,6 +18,11 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: 'encrypted-tbn0.gstatic.com',
             },
+            // Railway backend for uploaded images
+            {
+                protocol: 'https',
+                hostname: 'malik-shahzad-hackhaton-template-1-production.up.railway.app',
+            },
         ],
         // Allow unoptimized images for local product images
         unoptimized: false,
