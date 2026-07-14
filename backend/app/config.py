@@ -4,14 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Only use .env file if it exists (it won't exist in Railway/Docker)
-_env_file = os.path.join(BACKEND_DIR, ".env")
-if not os.path.exists(_env_file):
-    _env_file = None
-
 
 class Settings(BaseSettings):
-    # Database - defaults to SQLite for local dev, but use .env for PostgreSQL
+    # Database - defaults to SQLite for local dev, but use DATABASE_URL env for PostgreSQL
     DATABASE_URL: str = f"sqlite:///{os.path.join(BACKEND_DIR, 'shopco.db')}"
 
     # JWT Auth
@@ -32,28 +27,46 @@ class Settings(BaseSettings):
     # Better Auth Secret
     BETTER_AUTH_SECRET: str = ""
 
-    model_config = SettingsConfigDict(
-        env_file=_env_file,
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
+    model_config = SettingsConfigDict(extra="ignore")
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # ── Safety net: if pydantic-settings misses any OS env var, grab it ──
+        for field_name in self.model_fields:
+            env_val = os.environ.get(field_name)
+            if env_val is not None and env_val != str(getattr(self, field_name, "")):
+                object.__setattr__(self, field_name, env_val)
 
 
-settings = Settings()
+def _load_settings() -> Settings:
+    # ── 1. Try .env file (local dev) ──
+    env_path = os.path.join(BACKEND_DIR, ".env")
+    if os.path.exists(env_path):
+        print(f"⚙️  Loading .env file: {env_path}")
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    key = key.strip()
+                    value = value.strip()
+                    # Only set if NOT already in OS env (OS env takes priority)
+                    if key not in os.environ:
+                        os.environ[key] = value
 
-# Debug: log which env source is being used
-if _env_file:
-    print(f"⚙️  Loaded settings from .env file: {_env_file}")
-else:
-    print(f"⚙️  No .env file found — using OS environment variables only")
+    # ── 2. Load settings (pydantic reads from os.environ) ──
+    s = Settings()
 
-# Always log the DB URL being used (without exposing full connection string)
-db_url_preview = settings.DATABASE_URL
-if "://" in db_url_preview:
-    db_url_preview = db_url_preview.split("@")[-1] if "@" in db_url_preview else db_url_preview.split("://")[1]
-print(f"   DATABASE_URL: {settings.DATABASE_URL[:50]}...")
-print(f"   GEMINI_API_KEY: {'✅ Set' if settings.GEMINI_API_KEY else '❌ Not set'}")
-print(f"   QDRANT_URL: {'✅ Set' if settings.QDRANT_URL else '❌ Not set'}")
-print(f"   QDRANT_API_KEY: {'✅ Set' if settings.QDRANT_API_KEY else '❌ Not set'}")
-print(f"   JWT_SECRET: {'✅ Set' if settings.JWT_SECRET else '❌ Not set'}")
-print(f"   OPENROUTER_API_KEY: {'✅ Set' if settings.OPENROUTER_API_KEY else '❌ Not set'}")
+    # ── 3. Debug logging ──
+    db = s.DATABASE_URL or ""
+    print(f"⚙️  DATABASE_URL: {'✅ PostgreSQL' if 'postgresql' in db else '❌ SQLite'}")
+    print(f"   GEMINI_API_KEY:    {'✅ Set' if s.GEMINI_API_KEY else '❌ Not set'}")
+    print(f"   QDRANT_URL:        {'✅ Set' if s.QDRANT_URL else '❌ Not set'}")
+    print(f"   QDRANT_API_KEY:    {'✅ Set' if s.QDRANT_API_KEY else '❌ Not set'}")
+    print(f"   JWT_SECRET:        {'✅ Set' if s.JWT_SECRET else '❌ Not set'}")
+    print(f"   OPENROUTER_KEY:    {'✅ Set' if s.OPENROUTER_API_KEY else '❌ Not set'}")
+
+    return s
+
+
+settings = _load_settings()
