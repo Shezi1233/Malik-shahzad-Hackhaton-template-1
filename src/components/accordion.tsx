@@ -1,171 +1,139 @@
 "use client";
-import { ChangeEvent, useState } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Filter } from "lucide-react";
 
-const mockProducts = [
-  { id: 1, name: "Product 1", price: 50, color: "red", size: "M" },
-  { id: 2, name: "Product 2", price: 100, color: "blue", size: "L" },
-  { id: 3, name: "Product 3", price: 150, color: "green", size: "S" },
-  { id: 4, name: "Product 4", price: 75, color: "red", size: "XL" },
-  { id: 5, name: "Product 5", price: 125, color: "blue", size: "M" },
-];
+import { ChangeEvent } from "react";
 
-export function FilterComponent() {
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState(mockProducts);
+interface FilterComponentProps {
+  priceRange: [number, number];
+  selectedColors: string[];
+  selectedSizes: string[];
+  onPriceRangeChange: (range: [number, number]) => void;
+  onColorChange: (color: string) => void;
+  onSizeChange: (size: string) => void;
+  onApply: () => void;
+}
 
-  const handlePriceChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    const newPriceRange = [...priceRange];
-    newPriceRange[index] = parseInt(e.target.value);
-    setPriceRange(newPriceRange);
+export function FilterComponent({
+  priceRange,
+  selectedColors,
+  selectedSizes,
+  onPriceRangeChange,
+  onColorChange,
+  onSizeChange,
+  onApply,
+}: FilterComponentProps) {
+  const handleMinPrice = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value);
+    onPriceRangeChange([val, Math.max(val, priceRange[1])]);
   };
 
-  const handleColorChange = (color: string) => {
-    setSelectedColors((prevColors) =>
-      prevColors.includes(color)
-        ? prevColors.filter((c) => c !== color)
-        : [...prevColors, color]
-    );
+  const handleMaxPrice = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value);
+    onPriceRangeChange([Math.min(priceRange[0], val), val]);
   };
 
-  const handleSizeChange = (size: string) => {
-    setSelectedSizes((prevSizes) =>
-      prevSizes.includes(size)
-        ? prevSizes.filter((s) => s !== size)
-        : [...prevSizes, size]
-    );
-  };
+  const colors = [
+    { name: "Red", hex: "#4F4631" },
+    { name: "Teal", hex: "#314F4A" },
+    { name: "Navy", hex: "#31344F" },
+  ];
 
-  const applyFilters = () => {
-    const filtered = mockProducts.filter((product) => {
-      const matchesPrice =
-        product.price >= priceRange[0] && product.price <= priceRange[1];
-      const matchesColor =
-        selectedColors.length === 0 || selectedColors.includes(product.color);
-      const matchesSize =
-        selectedSizes.length === 0 || selectedSizes.includes(product.size);
-      return matchesPrice && matchesColor && matchesSize;
-    });
-
-    setFilteredProducts(filtered);
-  };
+  const sizes = ["S", "M", "L", "XL"];
 
   return (
     <div className="p-5">
-      <div className="flex justify-between items-center">
-        <h1 className="font-bold">Filter</h1>
-        <Filter />
+      <h1 className="font-bold text-xl mb-6">Filter</h1>
+
+      {/* Price Range */}
+      <div className="mb-6">
+        <h2 className="font-semibold text-lg mb-3">Price Range</h2>
+        <div className="flex flex-col space-y-4 px-1">
+          <div>
+            <label className="text-sm text-gray-500">Min: ${priceRange[0]}</label>
+            <input
+              type="range"
+              min="0"
+              max="300"
+              step="5"
+              value={priceRange[0]}
+              onChange={handleMinPrice}
+              className="w-full accent-black"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-gray-500">Max: ${priceRange[1]}</label>
+            <input
+              type="range"
+              min="0"
+              max="300"
+              step="5"
+              value={priceRange[1]}
+              onChange={handleMaxPrice}
+              className="w-full accent-black"
+            />
+          </div>
+          <div className="flex justify-between text-sm font-medium mt-1">
+            <span className="bg-gray-100 px-3 py-1 rounded-full">${priceRange[0]}</span>
+            <span className="bg-gray-100 px-3 py-1 rounded-full">${priceRange[1]}</span>
+          </div>
+        </div>
       </div>
 
-      <Accordion type="single" collapsible className="w-full">
-        {/* Price Range Filter */}
-        <AccordionItem value="price">
-          <AccordionTrigger>Price Range</AccordionTrigger>
-          <AccordionContent>
-            <div className="flex flex-col space-y-4">
-              <div>
-                <label className="text-sm font-semibold">
-                  Min: ${priceRange[0]}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1000"
-                  value={priceRange[0]}
-                  onChange={(e) => handlePriceChange(e, 0)}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-semibold">
-                  Max: ${priceRange[1]}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1000"
-                  value={priceRange[1]}
-                  onChange={(e) => handlePriceChange(e, 1)}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      <hr className="my-4" />
 
-        {/* Color Filter */}
-        <AccordionItem value="color">
-          <AccordionTrigger>Colors</AccordionTrigger>
-          <AccordionContent>
-            <div className="flex flex-wrap gap-2">
-              {["red", "blue", "green"].map((color) => (
-                <button
-                  key={color}
-                  className={`w-8 h-8 rounded-full ${
-                    selectedColors.includes(color) ? "ring-2 ring-black" : ""
-                  }`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => handleColorChange(color)}
-                />
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      {/* Colors */}
+      <div className="mb-6">
+        <h2 className="font-semibold text-lg mb-3">Colors</h2>
+        <div className="flex flex-wrap gap-3">
+          {colors.map((color) => (
+            <button
+              key={color.hex}
+              title={color.name}
+              className={`w-8 h-8 rounded-full border-2 transition-all ${
+                selectedColors.includes(color.hex)
+                  ? "border-black scale-110"
+                  : "border-transparent hover:scale-105"
+              }`}
+              style={{ backgroundColor: color.hex }}
+              onClick={() => onColorChange(color.hex)}
+            />
+          ))}
+        </div>
+        {selectedColors.length > 0 && (
+          <p className="text-xs text-gray-400 mt-1">
+            {selectedColors.length} selected
+          </p>
+        )}
+      </div>
 
-        {/* Size Filter */}
-        <AccordionItem value="size">
-          <AccordionTrigger>Size</AccordionTrigger>
-          <AccordionContent>
-            <div className="flex flex-wrap gap-2">
-              {["S", "M", "L", "XL"].map((size) => (
-                <button
-                  key={size}
-                  className={`px-3 py-1 border rounded-md ${
-                    selectedSizes.includes(size) ? "bg-black text-white" : ""
-                  }`}
-                  onClick={() => handleSizeChange(size)}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <hr className="my-4" />
 
-      {/* Apply Filters Button */}
+      {/* Sizes */}
+      <div className="mb-6">
+        <h2 className="font-semibold text-lg mb-3">Size</h2>
+        <div className="flex flex-wrap gap-2">
+          {sizes.map((size) => (
+            <button
+              key={size}
+              className={`px-5 py-2 rounded-[62px] text-sm font-medium transition-all ${
+                selectedSizes.includes(size)
+                  ? "bg-black text-white"
+                  : "bg-[#F0F0F0] text-gray-600 hover:bg-gray-200"
+              }`}
+              onClick={() => onSizeChange(size)}
+            >
+              {size}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Apply Button */}
       <button
-        className="mt-4 bg-black text-white py-2 px-4 rounded"
-        onClick={applyFilters}
+        className="w-full mt-2 bg-black text-white py-3 px-4 rounded-full font-medium hover:bg-gray-800 transition-colors"
+        onClick={onApply}
       >
         Apply Filter
       </button>
-
-      {/* Display Filtered Products */}
-      <div className="mt-6">
-        {filteredProducts.length > 0 ? (
-          <ul>
-            {filteredProducts.map((product) => (
-              <li key={product.id} className="border-b py-2">
-                {product.name} - ${product.price}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No products found.</p>
-        )}
-      </div>
     </div>
   );
 }

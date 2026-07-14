@@ -1,6 +1,8 @@
 import json
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -35,6 +37,11 @@ def _product_to_response(p: Product) -> ProductResponse:
 def list_products(
     category: str = Query(None, description="Filter by category"),
     search: str = Query(None, description="Search by title"),
+    min_price: Optional[float] = Query(None, description="Minimum price filter"),
+    max_price: Optional[float] = Query(None, description="Maximum price filter"),
+    sizes: Optional[str] = Query(None, description="Comma-separated sizes (e.g. S,M,L)"),
+    colors: Optional[str] = Query(None, description="Comma-separated color hex values (e.g. #4F4631,#31344F)"),
+    rating: Optional[float] = Query(None, description="Minimum rating filter"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -46,6 +53,33 @@ def list_products(
 
     if search:
         query = query.filter(Product.title.ilike(f"%{search}%"))
+
+    if min_price is not None:
+        query = query.filter(Product.price >= min_price)
+
+    if max_price is not None:
+        query = query.filter(Product.price <= max_price)
+
+    if rating is not None:
+        query = query.filter(Product.rating >= rating)
+
+    if sizes:
+        size_list = [s.strip() for s in sizes.split(",") if s.strip()]
+        if size_list:
+            # Filter products whose JSON sizes field contains any of the selected sizes
+            size_filters = []
+            for size in size_list:
+                size_filters.append(Product.sizes.ilike(f'%"{size}"%'))
+            query = query.filter(or_(*size_filters))
+
+    if colors:
+        color_list = [c.strip() for c in colors.split(",") if c.strip()]
+        if color_list:
+            # Filter products whose JSON colors field contains any of the selected colors
+            color_filters = []
+            for color in color_list:
+                color_filters.append(Product.colors.ilike(f'%{color}%'))
+            query = query.filter(or_(*color_filters))
 
     total = query.count()
     products = query.offset((page - 1) * page_size).limit(page_size).all()
