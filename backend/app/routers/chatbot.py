@@ -5,21 +5,19 @@ FULLY RAG-POWERED CHATBOT for SHOP.CO
 - Qdrant Cloud for vector similarity search
 - OpenRouter as fallback LLM
 - SQL keyword search as second fallback
+
+NOTE: All third-party imports (google.genai, qdrant_client, httpx) are lazy
+so the module loads even if optional dependencies are missing.
 """
 
 import asyncio
 import logging
 import os
 import re
-from typing import List, Optional
+from typing import Any, List, Optional
 
-import httpx
 from fastapi import APIRouter, Depends
-from google import genai as google_genai
-from google.genai import types as genai_types
 from pydantic import BaseModel
-from qdrant_client import QdrantClient
-from qdrant_client.http import models as qdrant_models
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -47,8 +45,8 @@ SIMILARITY_THRESHOLD = 0.25
 # GLOBAL STATE
 # ──────────────────────────────────────────
 
-genai_client: Optional[google_genai.Client] = None
-qdrant_client: Optional[QdrantClient] = None
+genai_client: Optional[Any] = None
+qdrant_client: Optional[Any] = None
 gemini_available = False
 index_ready = False
 
@@ -56,6 +54,43 @@ index_ready = False
 # ====================================================================
 #  RAG ENGINE: Qdrant Cloud + Gemini Embeddings (new genai SDK)
 # ====================================================================
+
+
+def _import_genai():
+    """Lazy-import and return the google.genai module."""
+    try:
+        import google.genai as _genai
+        return _genai
+    except ImportError:
+        return None
+
+
+def _import_genai_types():
+    """Lazy-import and return google.genai.types."""
+    try:
+        from google.genai import types as _types
+        return _types
+    except ImportError:
+        return None
+
+
+def _import_qdrant_client():
+    """Lazy-import and return qdrant_client.QdrantClient."""
+    try:
+        from qdrant_client import QdrantClient as _QdrantClient
+        return _QdrantClient
+    except ImportError:
+        return None
+
+
+def _import_qdrant_models():
+    """Lazy-import and return qdrant_client.http.models."""
+    try:
+        from qdrant_client.http import models as _models
+        return _models
+    except ImportError:
+        return None
+
 
 def get_embedding(text: str) -> List[float]:
     """Generate embedding via the new Gemini genai SDK."""
@@ -99,9 +134,13 @@ def init_rag_engine():
     # ── 1. Setup Gemini (new SDK) ──
     if settings.GEMINI_API_KEY:
         try:
-            genai_client = google_genai.Client(api_key=settings.GEMINI_API_KEY)
-            gemini_available = True
-            logger.info("Gemini configured successfully!")
+            _genai = _import_genai()
+            if _genai is None:
+                logger.warning("google-genai package not installed — skipping Gemini setup")
+            else:
+                genai_client = _genai.Client(api_key=settings.GEMINI_API_KEY)
+                gemini_available = True
+                logger.info("Gemini configured successfully!")
         except Exception as e:
             logger.error(f"Gemini config failed: {e}")
     else:
@@ -110,34 +149,40 @@ def init_rag_engine():
     # ── 2. Setup Qdrant Cloud ──
     if settings.QDRANT_URL and settings.QDRANT_API_KEY:
         try:
-            qdrant_client = QdrantClient(
-                url=settings.QDRANT_URL,
-                api_key=settings.QDRANT_API_KEY,
-                timeout=120,
-            )
-            collections = qdrant_client.get_collections().collections
-            existing = any(c.name == COLLECTION_NAME for c in collections)
-            if existing:
-                count = qdrant_client.count(COLLECTION_NAME).count
-                if count > 0:
-                    index_ready = True
-                    logger.info(f"Qdrant Cloud connected: {count} indexed products")
-                    return
+            _QdrantClient = _import_qdrant_client()
+            if _QdrantClient is None:
+                logger.warning("qdrant-client package not installed — skipping Qdrant setup")
+            else:
+                qdrant_client = _QdrantClient(
+                    url=settings.QDRANT_URL,
+                    api_key=settings.QDRANT_API_KEY,
+                    timeout=120,
+                )
+                collections = qdrant_client.get_collections().collections
+                existing = any(c.name == COLLECTION_NAME for c in collections)
+                if existing:
+                    count = qdrant_client.count(COLLECTION_NAME).count
+                    if count > 0:
+                        index_ready = True
+                        logger.info(f"Qdrant Cloud connected: {count} indexed products")
+                        return
 
-            logger.info("Creating product embeddings index on Qdrant Cloud...")
-            try:
-                qdrant_client.delete_collection(COLLECTION_NAME)
-            except Exception:
-                pass
+                logger.info("Creating product embeddings index on Qdrant Cloud...")
+                try:
+                    qdrant_client.delete_collection(COLLECTION_NAME)
+                except Exception:
+                    pass
 
-            qdrant_client.create_collection(
-                collection_name=COLLECTION_NAME,
-                vectors_config=qdrant_models.VectorParams(
-                    size=EMBEDDING_SIZE,
-                    distance=qdrant_models.Distance.COSINE,
-                ),
-            )
-            logger.info("Qdrant Cloud collection created!")
+                _qdrant_models = _import_qdrant_models()
+                if _qdrant_models:
+                    qdrant_client.create_collection(
+                        collection_name=COLLECTION_NAME,
+                        vectors_config=_qdrant_models.VectorParams(
+                            size=EMBEDDING_SIZE,
+                            distance=_qdrant_models.Distance.COSINE,
+                        ),
+                    )
+                    logger.info("Qdrant Cloud collection created!")
         except Exception as e:
             logger.error(f"Qdrant Cloud init failed: {e}")
             qdrant_client = None
@@ -166,6 +211,11 @@ def index_products(db: Session):
         logger.warning("No products to index")
         return
 
+    _qdrant_models = _import_qdrant_models()
+    if _qdrant_models is None:
+        logger.warning("Cannot index: qdrant models not available")
+        return
+
     points = []
     for p in products:
         try:
@@ -182,7 +232,7 @@ def index_products(db: Session):
 
             embedding = get_embedding(product_text)
 
-            points.append(qdrant_models.PointStruct(
+            points.append(_qdrant_models.PointStruct(
                 id=p.id,
                 vector=embedding,
                 payload={
@@ -364,6 +414,12 @@ async def query_openrouter(system_prompt: str, user_message: str) -> Optional[st
     if not settings.OPENROUTER_API_KEY:
         return None
 
+    try:
+        import httpx
+    except ImportError:
+        logger.warning("httpx not installed — skipping OpenRouter")
+        return None
+
     models_to_try = [
         "google/gemini-2.0-flash-001",  # Fast & cheap
         "openai/gpt-4o-mini",            # Widely available
@@ -512,13 +568,19 @@ async def generate_with_gemini(system_prompt: str, user_msg: str) -> Optional[st
     """Generate response using new Gemini genai SDK."""
     if not genai_client or not gemini_available:
         return None
+
+    _genai_types = _import_genai_types()
+    if _genai_types is None:
+        logger.warning("google.genai.types not available")
+        return None
+
     try:
         full_prompt = f"{system_prompt}\n\nCustomer: {user_msg}\nAssistant:"
         response = await asyncio.to_thread(
             genai_client.models.generate_content,
             model=GEMINI_MODEL,
             contents=full_prompt,
-            config=genai_types.GenerateContentConfig(
+            config=_genai_types.GenerateContentConfig(
                 temperature=0.7,
                 max_output_tokens=600,
             ),
@@ -649,22 +711,26 @@ def chatbot_status():
 def reindex(db: Session = Depends(get_db)):
     """Force re-index all products into Qdrant Cloud."""
     global index_ready
+
+    _qdrant_models = _import_qdrant_models()
+
     index_ready = False
     if qdrant_client:
         try:
             qdrant_client.delete_collection(COLLECTION_NAME)
         except Exception:
             pass
-        try:
-            qdrant_client.create_collection(
-                collection_name=COLLECTION_NAME,
-                vectors_config=qdrant_models.VectorParams(
-                    size=EMBEDDING_SIZE,
-                    distance=qdrant_models.Distance.COSINE,
-                ),
-            )
-        except Exception as e:
-            logger.error(f"Re-create collection error: {e}")
+        if _qdrant_models:
+            try:
+                qdrant_client.create_collection(
+                    collection_name=COLLECTION_NAME,
+                    vectors_config=_qdrant_models.VectorParams(
+                        size=EMBEDDING_SIZE,
+                        distance=_qdrant_models.Distance.COSINE,
+                    ),
+                )
+            except Exception as e:
+                logger.error(f"Re-create collection error: {e}")
 
     init_rag_engine()
     index_products(db)

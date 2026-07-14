@@ -1,9 +1,13 @@
 import os
 import threading
+import time
+
+from sqlalchemy import text
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from app.config import settings
 from app.database import Base, SessionLocal, engine
 from app.models import CartItem, Notification, Order, OrderItem, Product, User
 from app.routers import admin, cart, chatbot, notifications, orders, products, users
@@ -37,16 +41,33 @@ app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 @app.on_event("startup")
 def startup():
     """Initialize database tables, seed data, and RAG engine on startup."""
-    # Create all tables and seed — wrapped so app starts even if DB is slow
-    try:
-        Base.metadata.create_all(bind=engine)
-        from app.seed import seed_database
-        seed_database()
-        print("Database initialized and seeded successfully!")
-    except Exception as e:
-        print(f"WARNING: Database init failed (will retry on first request): {e}")
+    print("🚀 SHOP.CO API starting up...")
+    print(f"   Database: {settings.DATABASE_URL.split('?')[0][:60]}...")
 
-    # Initialize RAG engine in background thread
+    # Create all tables and seed — wrapped so app starts even if DB is slow
+    # Retry up to 3 times for PostgreSQL (Neon can be slow to wake up)
+    max_retries = 3
+    db_ok = False
+    for attempt in range(1, max_retries + 1):
+        try:
+            Base.metadata.create_all(bind=engine)
+            from app.seed import seed_database
+            seed_database()
+            print(f"✅ Database initialized and seeded successfully! (attempt {attempt})")
+            db_ok = True
+            break
+        except Exception as e:
+            print(f"⚠️  Database init attempt {attempt}/{max_retries} failed: {e}")
+            if attempt < max_retries:
+                wait = attempt * 2
+                print(f"   Retrying in {wait}s...")
+                time.sleep(wait)
+
+    if not db_ok:
+        print("❌ Database init failed after all retries — app will still serve /api/health")
+        print("   DB-dependent endpoints may return errors until DB is available.")
+
+    # Initialize RAG engine in background thread (never blocks startup)
     def _init_rag():
         try:
             from app.routers.chatbot import index_products, init_rag_engine
@@ -56,14 +77,30 @@ def startup():
                 index_products(db)
             finally:
                 db.close()
+            print("🤖 RAG engine initialized!")
         except Exception as e:
-            print(f"WARNING: RAG init failed: {e}")
+            print(f"⚠️  RAG init failed (non-fatal): {e}")
     threading.Thread(target=_init_rag, daemon=True).start()
+
+    print("✅ SHOP.CO API is ready!")
 
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok"}
+    """Health check endpoint — always responds so Railway knows the app is alive."""
+    db_status = "unknown"
+    try:
+        # Quick check if DB is reachable
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            db_status = "connected"
+    except Exception:
+        db_status = "disconnected"
+
+    return {
+        "status": "ok",
+        "database": db_status,
+    }
 
 
 @app.post("/api/reseed")
@@ -85,5 +122,6 @@ def reseed():
     db.close()
 
     # Re-seed
+    from app.seed import seed_database
     seed_database()
     return {"message": "Database re-seeded successfully"}
