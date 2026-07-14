@@ -105,6 +105,21 @@ def health():
     }
 
 
+@app.get("/api/debug/config")
+def debug_config():
+    """Debug endpoint to check which env vars are actually set (never returns secrets)."""
+    return {
+        "database_url_scheme": settings.DATABASE_URL.split("://")[0] if "://" in settings.DATABASE_URL else "unknown",
+        "database_url_set": bool(settings.DATABASE_URL and "sqlite" not in settings.DATABASE_URL),
+        "is_sqlite": "sqlite" in settings.DATABASE_URL if settings.DATABASE_URL else True,
+        "gemini_api_key_set": bool(settings.GEMINI_API_KEY),
+        "qdrant_url_set": bool(settings.QDRANT_URL),
+        "qdrant_api_key_set": bool(settings.QDRANT_API_KEY),
+        "openrouter_api_key_set": bool(settings.OPENROUTER_API_KEY),
+        "env_file_exists": os.path.exists(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")),
+    }
+
+
 @app.post("/api/reseed")
 def reseed():
     """Delete all data and re-seed the database."""
