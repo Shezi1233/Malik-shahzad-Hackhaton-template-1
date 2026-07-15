@@ -9,7 +9,7 @@ import { api } from "@/lib/api";
 import { Loader2, Eye, EyeOff, X } from "lucide-react";
 
 export default function SignIn() {
-  const { signin } = useAuth();
+  const { signin, setAuthFromToken } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,8 +40,7 @@ export default function SignIn() {
         { id_token: credential },
         false
       );
-      localStorage.setItem("access_token", result.access_token);
-      localStorage.setItem("user", JSON.stringify(result.user));
+      setAuthFromToken(result.access_token, result.user);
       router.push("/");
     } catch (err: any) {
       setError(err.message || "Google sign-in failed. Please try again.");

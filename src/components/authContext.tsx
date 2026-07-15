@@ -33,6 +33,7 @@ interface IAuthContext {
   signin: (email: string, password: string) => Promise<void>;
   signout: () => void;
   updateProfile: (data: Partial<User>) => Promise<void>;
+  setAuthFromToken: (access_token: string, user: User) => void;
 }
 
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
@@ -110,9 +111,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("user", JSON.stringify(updated));
   }, []);
 
+  const setAuthFromToken = useCallback((access_token: string, userData: User) => {
+    localStorage.setItem("access_token", access_token);
+    localStorage.setItem("user", JSON.stringify(userData));
+    setToken(access_token);
+    setUser(userData);
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoading, signup, signin, signout, updateProfile }}
+      value={{ user, token, isLoading, signup, signin, signout, updateProfile, setAuthFromToken }}
     >
       {children}
     </AuthContext.Provider>
