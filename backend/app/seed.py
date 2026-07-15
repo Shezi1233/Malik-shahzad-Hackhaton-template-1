@@ -979,6 +979,7 @@ def seed_database():
 
         # Filter out products from categories that already exist
         products_to_add = [p for p in products_data if p.category not in existing_categories]
+        new_categories_added = False
         if products_to_add:
             db.add_all(products_to_add)
             db.flush()
