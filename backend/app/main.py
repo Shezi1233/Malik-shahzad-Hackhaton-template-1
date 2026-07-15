@@ -154,16 +154,22 @@ def seed_products_direct():
             db.close()
             return {"message": f"Products already exist ({count} products)"}
         # Make sure admin exists with admin privileges
-        admin = db.query(User).filter(User.username == "admin").first()
-        if admin and not admin.is_admin:
-            admin.is_admin = True
+        admin_user = db.query(User).filter(User.username == "admin").first()
+        if admin_user and not admin_user.is_admin:
+            admin_user.is_admin = True
             db.commit()
-    except:
+            print("✅ Admin promoted!")
+    except Exception as e:
+        print(f"⚠️ Admin check error: {e}")
         pass
     finally:
         db.close()
     from app.seed import seed_database
-    seed_database()
+    try:
+        seed_database()
+        print("✅ seed_database() completed")
+    except Exception as e:
+        print(f"❌ seed_database() error: {e}")
     db = SessionLocal()
     try:
         c = db.query(Product).count()
@@ -171,4 +177,4 @@ def seed_products_direct():
         return {"message": f"Seed completed. Products: {c}"}
     except:
         db.close()
-        return {"message": "Seed completed"}
+        return {"message": "Seed completed but count failed"}
