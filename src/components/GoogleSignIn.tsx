@@ -13,30 +13,11 @@ declare global {
             scope: string;
             callback: (response: {
               access_token?: string;
-              id_token?: string;
               error?: string;
             }) => void;
-            error_callback?: (error: { message: string }) => void;
           }) => {
             requestAccessToken: () => void;
           };
-        };
-        id: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: { credential: string }) => void;
-            cancel_on_tap_outside?: boolean;
-            auto_select?: boolean;
-          }) => void;
-          prompt: (
-            momentListener?: (notification: {
-              isDisplayMoment: () => boolean;
-              isNotDisplayed: () => boolean;
-              isSkippedMoment: () => boolean;
-              getNotDisplayedReason: () => string;
-              getSkippedReason: () => string;
-            }) => void
-          ) => void;
         };
       };
     };
@@ -44,7 +25,7 @@ declare global {
 }
 
 interface GoogleSignInProps {
-  onSuccess: (credential: string) => Promise<void> | void;
+  onSuccess: (accessToken: string) => Promise<void> | void;
   onError?: (message: string) => void;
   buttonText?: string;
 }
@@ -58,6 +39,7 @@ export default function GoogleSignIn({
   const [loading, setLoading] = useState(false);
   const scriptLoaded = useRef(false);
   const onSuccessRef = useRef(onSuccess);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Keep callback ref fresh
   useEffect(() => {
@@ -96,18 +78,16 @@ export default function GoogleSignIn({
 
     setLoading(true);
 
-    // Use OAuth 2.0 Token Client for proper popup flow
+    // Get access_token, then backend uses it to fetch user info from Google
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,
-      scope: "openid email profile",
+      scope: "email profile",
       callback: (response) => {
         setLoading(false);
-        if (response?.id_token) {
-          // Backend expects the id_token
-          onSuccessRef.current(response.id_token);
+        if (response?.access_token) {
+          onSuccessRef.current(response.access_token);
         } else if (response?.error === "user_cancelled") {
-          // User closed the popup — not an error, just cancelled
-          // Don't show any error message for this
+          // User closed popup — not an error
         } else if (response?.error) {
           onError?.("Google sign-in cancelled.");
         } else {
@@ -116,12 +96,12 @@ export default function GoogleSignIn({
       },
     });
 
-    // This opens the Google account selector popup
     client.requestAccessToken();
   };
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={handleGoogleSignIn}
       disabled={loading}

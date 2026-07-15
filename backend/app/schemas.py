@@ -170,7 +170,7 @@ class OrderTrackResponse(BaseModel):
 
 # ===== GOOGLE AUTH SCHEMAS =====
 class GoogleAuthRequest(BaseModel):
-    id_token: str
+    access_token: str
 
 
 # ===== NOTIFICATION SCHEMAS =====

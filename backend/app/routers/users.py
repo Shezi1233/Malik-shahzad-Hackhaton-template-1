@@ -1,7 +1,3 @@
-import json
-import urllib.request
-import urllib.parse
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -78,17 +74,31 @@ def signin(req: UserSigninRequest, db: Session = Depends(get_db)):
 
 @router.post("/google-auth", response_model=TokenResponse)
 def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
-    """Authenticate (or create account) with a Google ID token."""
-    # Verify Google ID token via Google's tokeninfo endpoint
+    """Authenticate (or create account) with a Google access token.
+    Uses access_token to fetch user info from Google's userinfo endpoint.
+    """
+    import httpx
+
+    # Fetch user info from Google using the access_token
     try:
-        url = f"https://oauth2.googleapis.com/tokeninfo?id_token={urllib.parse.quote(req.id_token)}"
-        with urllib.request.urlopen(url, timeout=15) as resp:
-            google_data = json.loads(resp.read())
+        with httpx.Client(timeout=15) as client:
+            resp = client.get(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                headers={"Authorization": f"Bearer {req.access_token}"},
+            )
+            if resp.status_code != 200:
+                raise HTTPException(
+                    status_code=401,
+                    detail=f"Google token verification failed: {resp.text[:200]}",
+                )
+            google_data = resp.json()
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Google token verification failed: {e}")
+        raise HTTPException(status_code=401, detail=f"Google verification failed: {e}")
 
     # Validate token audience (client ID) if configured
-    if settings.GOOGLE_CLIENT_ID and google_data.get("aud") != settings.GOOGLE_CLIENT_ID:
+    if settings.GOOGLE_CLIENT_ID and google_data.get("aud") and google_data["aud"] != settings.GOOGLE_CLIENT_ID:
         raise HTTPException(status_code=401, detail="Token audience mismatch")
 
     email = google_data.get("email", "")
@@ -102,8 +112,7 @@ def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
 
     if not user:
-        # Create a new user from Google profile
-        # Derive a username from the email (before @)
+        # Derive a username from the email
         base_username = email.split("@")[0]
         username = base_username
         counter = 1

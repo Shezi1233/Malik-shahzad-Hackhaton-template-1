@@ -32,12 +32,12 @@ export default function SignIn() {
     }
   };
 
-  const handleGoogleSuccess = async (credential: string) => {
+  const handleGoogleSuccess = async (accessToken: string) => {
     setError("");
     try {
       const result = await api.post<{ access_token: string; user: any }>(
         "/users/google-auth",
-        { id_token: credential },
+        { access_token: accessToken },
         false
       );
       setAuthFromToken(result.access_token, result.user);
