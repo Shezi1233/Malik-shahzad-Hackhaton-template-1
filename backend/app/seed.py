@@ -17,15 +17,21 @@ def seed_database():
         # Create admin if not exists
         admin = db.query(User).filter(User.is_admin == True).first()
         if not admin:
-            admin = User(
-                username="admin",
-                email="admin@shop.co",
-                hashed_password=hash_password("admin123"),
-                is_admin=True,
-                full_name="Admin",
-            )
-            db.add(admin)
-            db.flush()
+            admin = db.query(User).filter(User.username == "admin").first()
+            if admin:
+                admin.is_admin = True
+                db.flush()
+                print("✅ Promoted existing 'admin' user to admin!")
+            else:
+                admin = User(
+                    username="admin",
+                    email="admin@shop.co",
+                    hashed_password=hash_password("admin123"),
+                    is_admin=True,
+                    full_name="Admin",
+                )
+                db.add(admin)
+                db.flush()
 
         products_data = [
             # ================================================================
