@@ -991,7 +991,7 @@ def seed_database():
 
         notifications = [
             Notification(
-                user_id=admin_id,
+                user_id=admin.id,
                 title="Welcome to SHOP.CO!",
                 message="Welcome! Start exploring our latest collection and enjoy shopping.",
             ),
