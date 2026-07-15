@@ -168,6 +168,11 @@ class OrderTrackResponse(BaseModel):
         from_attributes = True
 
 
+# ===== GOOGLE AUTH SCHEMAS =====
+class GoogleAuthRequest(BaseModel):
+    id_token: str
+
+
 # ===== NOTIFICATION SCHEMAS =====
 class NotificationResponse(BaseModel):
     id: int

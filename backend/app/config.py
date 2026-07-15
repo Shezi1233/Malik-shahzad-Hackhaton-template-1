@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     QDRANT_API_KEY: str = ""
     OPENROUTER_API_KEY: str = ""
     BETTER_AUTH_SECRET: str = ""
+    GOOGLE_CLIENT_ID: str = ""
 
     model_config = SettingsConfigDict(extra="ignore")
 
@@ -72,6 +73,7 @@ def _load_settings() -> Settings:
         "JWT_SECRET": os.environ.get("JWT_SECRET"),
         "OPENROUTER_API_KEY": os.environ.get("OPENROUTER_API_KEY"),
         "BETTER_AUTH_SECRET": os.environ.get("BETTER_AUTH_SECRET"),
+        "GOOGLE_CLIENT_ID": os.environ.get("GOOGLE_CLIENT_ID"),
     }
 
     for field_name, env_val in direct_overrides.items():
@@ -88,6 +90,7 @@ def _load_settings() -> Settings:
     print(f"   QDRANT_API_KEY:    {'✅ Set' if s.QDRANT_API_KEY else '❌ Not set'}")
     print(f"   JWT_SECRET:        {'✅ Set' if s.JWT_SECRET else '❌ Not set'}")
     print(f"   OPENROUTER_KEY:    {'✅ Set' if s.OPENROUTER_API_KEY else '❌ Not set'}")
+    print(f"   GOOGLE_CLIENT_ID:  {'✅ Set' if s.GOOGLE_CLIENT_ID else '❌ Not set'}")
 
     return s
 
