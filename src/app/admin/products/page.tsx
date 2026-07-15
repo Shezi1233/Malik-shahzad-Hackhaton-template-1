@@ -429,7 +429,57 @@ export default function AdminProducts() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              {/* Mobile: Card view */}
+              <div className="block md:hidden divide-y divide-gray-100">
+                {filteredProducts.map((product) => (
+                  <div key={product.id} className="p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-14 h-14 rounded-lg bg-[#F0EEED] overflow-hidden flex-shrink-0">
+                        {product.img_url ? (
+                          <Image
+                            src={product.img_url}
+                            alt={product.title}
+                            width={56}
+                            height={56}
+                            className="w-full h-full object-cover"
+                            unoptimized
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-300">
+                            <Package size={20} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 text-sm truncate">{product.title}</p>
+                        <p className="text-xs text-gray-400 truncate">{product.slug}</p>
+                        <p className="text-sm font-bold text-gray-900 mt-1">
+                          ${product.price.toFixed(2)}
+                          {product.old_price && (
+                            <span className="text-gray-400 line-through ml-1 text-xs">${product.old_price.toFixed(2)}</span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => openEditModal(product)} className="p-2 text-gray-400 hover:text-blue-600" title="Edit"><Edit3 size={16} /></button>
+                        <button onClick={() => confirmDelete(product)} className="p-2 text-gray-400 hover:text-red-600" title="Delete"><Trash2 size={16} /></button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="capitalize bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{product.category?.replace(/_/g, " ")}</span>
+                      <span className={`font-medium ${product.stock <= 0 ? "text-red-500" : product.stock <= 5 ? "text-orange-500" : "text-green-600"}`}>
+                        {product.stock <= 0 ? "Out of stock" : `${product.stock} in stock`}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Desktop: Table view */}
+              <div className="overflow-x-auto hidden md:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/50 text-gray-500">
@@ -594,6 +644,7 @@ export default function AdminProducts() {
                 </tbody>
               </table>
             </div>
+          </>
           )}
         </div>
       )}
@@ -694,8 +745,15 @@ export default function AdminProducts() {
                   >
                     <option value="new_arrivals">New Arrivals</option>
                     <option value="top_selling">Top Selling</option>
+                    <option value="t-shirts">T-Shirts</option>
+                    <option value="shirts">Shirts</option>
+                    <option value="pants">Pants &amp; Jeans</option>
+                    <option value="shorts">Shorts</option>
+                    <option value="outerwear">Outerwear</option>
+                    <option value="hoodies">Hoodies</option>
+                    <option value="dresses">Dresses</option>
+                    <option value="activewear">Activewear</option>
                     <option value="you_might_also_like">You Might Also Like</option>
-                    <option value="casual">Casual</option>
                   </select>
                 </div>
               </div>
@@ -904,8 +962,15 @@ export default function AdminProducts() {
                   >
                     <option value="new_arrivals">New Arrivals</option>
                     <option value="top_selling">Top Selling</option>
+                    <option value="t-shirts">T-Shirts</option>
+                    <option value="shirts">Shirts</option>
+                    <option value="pants">Pants &amp; Jeans</option>
+                    <option value="shorts">Shorts</option>
+                    <option value="outerwear">Outerwear</option>
+                    <option value="hoodies">Hoodies</option>
+                    <option value="dresses">Dresses</option>
+                    <option value="activewear">Activewear</option>
                     <option value="you_might_also_like">You Might Also Like</option>
-                    <option value="casual">Casual</option>
                   </select>
                 </div>
               </div>

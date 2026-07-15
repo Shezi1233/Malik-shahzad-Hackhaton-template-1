@@ -178,7 +178,38 @@ export default function AdminUsers() {
               <p>{search ? "No users match your search" : "No users found"}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              {/* Mobile: Card view */}
+              <div className="block md:hidden divide-y divide-gray-100">
+                {filteredUsers.map((user) => (
+                  <div key={user.id} className="p-4 flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${user.is_admin ? "bg-black" : "bg-gray-400"}`}>
+                      {user.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900 text-sm">{user.username}</span>
+                        {user.is_admin ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-black text-white rounded-full text-[10px] font-medium"><Shield size={10} />Admin</span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-[10px] font-medium"><ShieldOff size={10} />User</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      <p className="text-xs text-gray-400">Joined {new Date(user.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {!user.is_admin ? (
+                        <button onClick={() => confirmDelete(user)} className="p-2 text-gray-400 hover:text-red-600" title="Delete user"><Trash2 size={16} /></button>
+                      ) : (
+                        <span className="text-[10px] text-gray-400 italic">Protected</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Desktop: Table view */}
+              <div className="overflow-x-auto hidden md:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/50 text-gray-500">
@@ -282,6 +313,7 @@ export default function AdminUsers() {
                 </tbody>
               </table>
             </div>
+          </>
           )}
         </div>
       )}
