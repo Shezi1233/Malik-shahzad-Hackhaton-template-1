@@ -33,18 +33,39 @@ export function SheetSide() {
             {/* navbav */}
             <ul className="">
               <li className="grid grid-cols-1 gap-y-4">
-                <Link href={""}>
-                  {" "}
-                  <NavigationMenuDemo />
-                </Link>
-                <Link className="ml-3" href={""}>
-                  On Sale
-                </Link>
-                <Link className="ml-3" href={""}>
+                <Link className="ml-3 font-bold text-lg" href={"/all-products?category=new_arrivals"}>
                   New Arrivals
                 </Link>
-                <Link className="ml-3" href={""}>
-                  Brands
+                <Link className="ml-3" href={"/all-products?category=t-shirts"}>
+                  T-Shirts
+                </Link>
+                <Link className="ml-3" href={"/all-products?category=shirts"}>
+                  Shirts
+                </Link>
+                <Link className="ml-3" href={"/all-products?category=pants"}>
+                  Pants &amp; Jeans
+                </Link>
+                <Link className="ml-3" href={"/all-products?category=shorts"}>
+                  Shorts
+                </Link>
+                <Link className="ml-3" href={"/all-products?category=outerwear"}>
+                  Outerwear
+                </Link>
+                <Link className="ml-3" href={"/all-products?category=hoodies"}>
+                  Hoodies
+                </Link>
+                <Link className="ml-3" href={"/all-products?category=activewear"}>
+                  Activewear
+                </Link>
+                <Link className="ml-3" href={"/all-products?category=top_selling"}>
+                  Top Selling
+                </Link>
+                <hr className="my-2" />
+                <Link className="ml-3" href={"/casual"}>
+                  On Sale
+                </Link>
+                <Link className="ml-3" href={"/products"}>
+                  All Products
                 </Link>
               </li>
             </ul>

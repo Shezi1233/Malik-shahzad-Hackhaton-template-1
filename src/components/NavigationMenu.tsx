@@ -15,29 +15,46 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
-const components: { title: string; href: string; description: string }[] = [
+const categories: { title: string; href: string; description: string }[] = [
   {
-    title: "Casual",
-    href: "/casual",
-    description:
-      "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
+    title: "New Arrivals",
+    href: "/all-products?category=new_arrivals",
+    description: "Latest styles and fresh drops just landed.",
   },
   {
-    title: "Scroll-area",
-    href: "/docs/primitives/scroll-area",
-    description: "Visually or semantically separates content.",
+    title: "T-Shirts",
+    href: "/all-products?category=t-shirts",
+    description: "Graphic tees, polos, and classic crew necks.",
   },
   {
-    title: "Tabs",
-    href: "/docs/primitives/tabs",
-    description:
-      "A set of layered sections of content—known as tab panels—that are displayed one at a time.",
+    title: "Shirts",
+    href: "/all-products?category=shirts",
+    description: "From casual linen to formal button-downs.",
   },
   {
-    title: "Tooltip",
-    href: "/docs/primitives/tooltip",
-    description:
-      "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
+    title: "Pants & Jeans",
+    href: "/all-products?category=pants",
+    description: "Jeans, chinos, cargos, and tailored trousers.",
+  },
+  {
+    title: "Shorts",
+    href: "/all-products?category=shorts",
+    description: "Bermuda, chino, athletic, and swim trunks.",
+  },
+  {
+    title: "Outerwear",
+    href: "/all-products?category=outerwear",
+    description: "Jackets, coats, parkas, and bombers.",
+  },
+  {
+    title: "Hoodies",
+    href: "/all-products?category=hoodies",
+    description: "Pullovers, zip-ups, and sweatshirts.",
+  },
+  {
+    title: "Activewear",
+    href: "/all-products?category=activewear",
+    description: "Performance gear for training and beyond.",
   },
 ];
 
@@ -51,14 +68,13 @@ export function NavigationMenuDemo() {
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-              {components.map((component, index) => (
-                <Link href={"/casual"} key={index}>
+              {categories.map((cat) => (
+                <Link href={cat.href} key={cat.title}>
                   <ListItem
-                    key={component.title}
-                    title={component.title}
-                    href={"/casual"}
+                    title={cat.title}
+                    href={cat.href}
                   >
-                    {component.description}
+                    {cat.description}
                   </ListItem>
                 </Link>
               ))}

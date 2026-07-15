@@ -109,9 +109,10 @@ export default function Header() {
           <Link href={""}>
             <NavigationMenuDemo />
           </Link>
+          <Link href={"/all-products?category=new_arrivals"}>New Arrivals</Link>
+          <Link href={"/all-products?category=top_selling"}>Top Selling</Link>
+          <Link href={"/all-products"}>All Products</Link>
           <Link href={"/casual"}>On Sale</Link>
-          <Link href={"/products"}>New Arrivals</Link>
-          <Link href={"/"}>Brands</Link>
         </li>
       </ul>
 
