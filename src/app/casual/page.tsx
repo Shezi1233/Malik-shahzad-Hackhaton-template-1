@@ -47,6 +47,7 @@ export default function Casual() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedStyle, setSelectedStyle] = useState<string>("");
   const [productCount, setProductCount] = useState<number>(0);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // ── Applied filters (what the API actually uses) ──
   const [appliedFilters, setAppliedFilters] = useState<{
@@ -119,9 +120,94 @@ export default function Casual() {
   }, []);
 
   return (
-    <main className="flex flex-col sm:flex-row justify-center items-start space-x-6 px-4 mt-6">
-      {/* left sidebar */}
-      <div className="w-full md:w-[295px] border rounded-[16px] p-4">
+    <main className="flex flex-col md:flex-row justify-center items-start md:space-x-6 px-4 mt-6 relative">
+      {/* Mobile Filter Toggle Button */}
+      <button
+        onClick={() => setMobileFiltersOpen(true)}
+        className="md:hidden w-full bg-black text-white py-3 rounded-full font-medium mb-4 flex items-center justify-center gap-2"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+        Filters &amp; Sorting
+      </button>
+
+      {/* Mobile Filter Overlay */}
+      {mobileFiltersOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setMobileFiltersOpen(false)}
+          />
+          {/* Sidebar Panel */}
+          <div className="absolute right-0 top-0 h-full w-[85vw] max-w-[360px] bg-white shadow-xl overflow-y-auto animate-in slide-in-from-right duration-300">
+            <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white z-10">
+              <h1 className="font-bold text-xl">Filters</h1>
+              <button
+                onClick={() => setMobileFiltersOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="text-sm text-gray-500 underline hover:text-black"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+              <FilterComponent
+                priceRange={priceRange}
+                selectedColors={selectedColors}
+                selectedSizes={selectedSizes}
+                onPriceRangeChange={setPriceRange}
+                onColorChange={handleColorChange}
+                onSizeChange={handleSizeChange}
+                onApply={() => { handleApply(); setMobileFiltersOpen(false); }}
+              />
+              <hr className="my-3" />
+              <SliderDemo
+                priceRange={priceRange}
+                onPriceRangeChange={setPriceRange}
+              />
+              <hr className="my-3" />
+              <CheckboxDemo
+                selectedColors={selectedColors}
+                onColorChange={handleColorChange}
+              />
+              <hr className="my-3" />
+              <Size
+                selectedSizes={selectedSizes}
+                onSizeChange={handleSizeChange}
+              />
+              <hr className="my-3" />
+              <DressStyleFilter
+                selectedStyle={selectedStyle}
+                onStyleChange={setSelectedStyle}
+              />
+              <div className="mt-4">
+                <button
+                  onClick={() => { handleApply(); setMobileFiltersOpen(false); }}
+                  className="w-full bg-black text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Apply Filters {hasActiveFilters ? `(${productCount || "..."})` : ""}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* left sidebar - desktop only */}
+      <div className="hidden md:block md:w-[295px] border rounded-[16px] p-4">
         <div className="flex items-center justify-between mb-2 px-5 pt-2">
           <h1 className="font-bold text-xl">Filters</h1>
           {hasActiveFilters && (

@@ -54,25 +54,25 @@ export default function Cart() {
           ) : (
             cart.map((item) => (
               <div
-                className="flex justify-between p-4 border-b"
+                className="flex justify-between p-3 sm:p-4 border-b"
                 key={item.id}
               >
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3 flex-1 min-w-0">
                   <Image
                     src={item.img_url}
                     alt={item.title}
-                    className="rounded-[16px] object-cover"
-                    width={100}
-                    height={100}
+                    className="rounded-[16px] object-cover flex-shrink-0"
+                    width={80}
+                    height={80}
                   />
-                  <div>
-                    <h3 className="font-bold">{item.title}</h3>
-                    <p className="text-sm text-gray-500">Size: {item.size || "N/A"}</p>
-                    <p className="text-sm text-gray-500">Color: {item.color || "N/A"}</p>
-                    <p className="font-bold mt-1">${Number(item.price).toFixed(2)}</p>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-sm sm:text-base truncate">{item.title}</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">Size: {item.size || "N/A"}</p>
+                    <p className="text-xs sm:text-sm text-gray-500">Color: {item.color || "N/A"}</p>
+                    <p className="font-bold mt-1 text-sm sm:text-base">${Number(item.price).toFixed(2)}</p>
                   </div>
                 </div>
-                <div className="flex flex-col justify-between items-center space-y-5">
+                <div className="flex flex-col justify-between items-center space-y-5 flex-shrink-0 ml-2">
                   <Delete
                     onClick={() => removeFromCart(item.id)}
                     className="cursor-pointer hover:text-red-500"

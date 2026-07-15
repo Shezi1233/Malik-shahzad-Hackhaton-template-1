@@ -58,25 +58,22 @@ export default function CustomerCarousel() {
         initial="hidden"
         whileInView={"show"}
         viewport={{ once: false, amount: 0.7 }}
-        className="w-full flex justify-center items-center mt-10 mb-1 max-w-screen-xl mx-auto"
+        className="w-full flex justify-center items-center mt-5 sm:mt-10 mb-1 max-w-screen-xl mx-auto"
       >
         {/* Container */}
-        <div className="w-[95%] md:w-[80%] p-3 md:p-0">
+        <div className="w-full md:w-[80%] px-3 md:p-0">
           {/* Header */}
           <div className="flex justify-between items-start">
-            {/* <h1 className="text-black text-3xl md:text-4xl font-extrabold pt-4 text-center md:text-left">
-              OUR HAPPY CUSTOMERS
-            </h1> */}
-            <img className="mt-11" src="/images/customer.png" alt="" />
+            <img className="mt-5 sm:mt-11 max-w-full h-auto w-[200px] sm:w-auto" src="/images/customer.png" alt="" />
           </div>
-          <div className="relative mt-10 bg-red-">
-            {/* Carousel */}
-            <Carousel className="w-full md:max-w-[100%] mx-auto relative">
-              {/* Buttons */}
-              <CarouselPrevious className="absolute top-[-1rem] md:top-[-3rem]  left-[230px] md:left-[500px] lg:left-[700px] xl:left-[920px] text-gray-600 hover:text-black" />
-              <CarouselNext className="absolute top-[-1rem] md:top-[-3rem]   right-0 md:right-2 text-gray-600 hover:text-black" />
-
-              <CarouselContent className="-ml-1 flex  flex-row mt-4">
+          <div className="relative mt-4 sm:mt-10">
+            <Carousel className="w-full">
+              {/* Buttons positioned at top-right */}
+              <div className="absolute -top-10 sm:-top-14 right-0 flex gap-2 z-10">
+                <CarouselPrevious className="static translate-y-0 text-gray-600 hover:text-black border rounded-full p-2" />
+                <CarouselNext className="static translate-y-0 text-gray-600 hover:text-black border rounded-full p-2" />
+              </div>
+              <CarouselContent className="-ml-1 flex flex-row mt-4">
                 {testimonials.map((testimonial, index) => (
                   <CarouselItem
                     key={index}

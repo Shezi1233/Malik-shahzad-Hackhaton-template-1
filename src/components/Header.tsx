@@ -94,12 +94,12 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full h-[60px] bg-white flex justify-between items-center max-w-screen-2xl mx-auto px-4 sm:px-0">
+    <header className="w-full h-[60px] bg-white flex justify-between items-center max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
       {/* left */}
       <div className="flex justify-center items-center text-black font-black">
         <SheetSide />
         <Link href="/">
-          <h1 className="text-3xl sm:text-black sm:text-4xl pl-2">SHOP.CO</h1>
+          <h1 className="text-2xl sm:text-black sm:text-4xl pl-2">SHOP.CO</h1>
         </Link>
       </div>
 
@@ -192,20 +192,21 @@ export default function Header() {
       </div>
 
       {/* right side icons */}
-      <div className="flex items-center mr-2 sm:mr-7 space-x-3 sm:space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-4">
         {/* Mobile Search Icon */}
         <button
           onClick={() => {
             searchInputRef.current?.focus();
             router.push("/search");
           }}
-          className="md:hidden text-xl"
+          className="md:hidden p-1.5"
+          aria-label="Search products"
         >
-          <IoIosSearch className="text-xl" />
+          <IoIosSearch className="text-2xl" />
         </button>
 
         <Link href={"/cart"}>
-          <IoCartOutline className="text-3xl" />
+          <IoCartOutline className="text-2xl sm:text-3xl" />
         </Link>
         <Notifications />
 

@@ -6,13 +6,13 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <main className="bg-[#F0F0F0] w-full h-full md:h-[450px] relative mt-32  max-w-screen-2xl mx-auto">
+    <main className="bg-[#F0F0F0] w-full h-full md:h-[450px] relative mt-20 sm:mt-32 max-w-screen-2xl mx-auto">
       {/*  */}
-      <span className="absolute top-[-80px]">
+      <div className="absolute top-[-60px] sm:top-[-80px] left-0 right-0 z-10">
         <Offers />
-      </span>
+      </div>
       {/* container */}
-      <div className="flex h-full md:h-[400px] flex-col md:flex-row justify-between items-start p-5 pt-[160px] sm:pt-32 border-b ">
+      <div className="flex h-full md:h-[400px] flex-col md:flex-row justify-between items-start p-5 pt-24 sm:pt-36 border-b ">
         {/* top div */}
         <div className="flex flex-col justify-center items-center w-[200px]">
           <ul>
@@ -74,9 +74,9 @@ export default function Footer() {
         {/* complete boxes*/}
       </div>
       {/* bottom div */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-3">
-        <p className="text-sm">Shop.co © 2000-2023, All Rights Reserved</p>
-        <div className="flex items-center -my-10 ml-10">
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-3 px-5 gap-4 sm:gap-0">
+        <p className="text-xs sm:text-sm text-center">Shop.co © 2000-2023, All Rights Reserved</p>
+        <div className="flex items-center flex-wrap justify-center">
           <Image
             src={"/cards/visa.png"}
             className="w-[50px]"

@@ -75,7 +75,7 @@ export default function Top_sell() {
       <div className="flex justify-center mt-8">
         <a
           href="/products/all"
-          className="px-16 py-3 border border-gray-300 rounded-full text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+          className="px-16 py-3 border border-gray-300 rounded-full text-gray-600 font-medium hover:bg-gray-50 transition-colors inline-block w-full sm:w-auto text-center"
         >
           View All
         </a>
