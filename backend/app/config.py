@@ -12,6 +12,7 @@ _raw_gemini = os.environ.get("GEMINI_API_KEY", "")
 _raw_jwt = os.environ.get("JWT_SECRET", "")
 _raw_openrouter = os.environ.get("OPENROUTER_API_KEY", "")
 _raw_bauth = os.environ.get("BETTER_AUTH_SECRET", "")
+_raw_google = os.environ.get("GOOGLE_CLIENT_ID", "")
 
 print("=" * 60)
 print("🔍 RAW os.environ READ (before pydantic):")
@@ -21,6 +22,7 @@ print(f"   QDRANT_API_KEY:     {'✅ FOUND' if _raw_qdrant_key else '❌ NOT FOU
 print(f"   GEMINI_API_KEY:     {'✅ FOUND' if _raw_gemini else '❌ NOT FOUND'} (len={len(_raw_gemini)})")
 print(f"   JWT_SECRET:         {'✅ FOUND' if _raw_jwt else '❌ NOT FOUND'} (len={len(_raw_jwt)})")
 print(f"   OPENROUTER_API_KEY: {'✅ FOUND' if _raw_openrouter else '❌ NOT FOUND'} (len={len(_raw_openrouter)})")
+print(f"   GOOGLE_CLIENT_ID:   {'✅ FOUND' if _raw_google else '❌ NOT FOUND'} (len={len(_raw_google)})")
 
 # Show all env var names (no values!) to debug
 print(f"\n📋 ALL env var names ({len(os.environ)} total):")
