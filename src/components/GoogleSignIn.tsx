@@ -7,6 +7,20 @@ declare global {
   interface Window {
     google?: {
       accounts: {
+        oauth2: {
+          initTokenClient: (config: {
+            client_id: string;
+            scope: string;
+            callback: (response: {
+              access_token?: string;
+              id_token?: string;
+              error?: string;
+            }) => void;
+            error_callback?: (error: { message: string }) => void;
+          }) => {
+            requestAccessToken: () => void;
+          };
+        };
         id: {
           initialize: (config: {
             client_id: string;
@@ -22,10 +36,6 @@ declare global {
               getNotDisplayedReason: () => string;
               getSkippedReason: () => string;
             }) => void
-          ) => void;
-          renderButton: (
-            parent: HTMLElement,
-            options: Record<string, unknown>
           ) => void;
         };
       };
@@ -46,7 +56,7 @@ export default function GoogleSignIn({
 }: GoogleSignInProps) {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const [loading, setLoading] = useState(false);
-  const initialized = useRef(false);
+  const scriptLoaded = useRef(false);
   const onSuccessRef = useRef(onSuccess);
 
   // Keep callback ref fresh
@@ -55,21 +65,19 @@ export default function GoogleSignIn({
   }, [onSuccess]);
 
   useEffect(() => {
-    if (!clientId || initialized.current) return;
-    initialized.current = true;
+    if (!clientId || scriptLoaded.current) return;
+    scriptLoaded.current = true;
 
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
-    script.onload = () => {};
     script.onerror = () => {
       onError?.("Failed to load Google sign-in. Please try again.");
     };
     document.body.appendChild(script);
 
     return () => {
-      // Cleanup script (only if we added it)
       if (script.parentNode) {
         document.body.removeChild(script);
       }
@@ -77,7 +85,7 @@ export default function GoogleSignIn({
   }, [clientId, onError]);
 
   if (!clientId) {
-    return null; // Hide button if not configured
+    return null;
   }
 
   const handleGoogleSignIn = () => {
@@ -88,30 +96,28 @@ export default function GoogleSignIn({
 
     setLoading(true);
 
-    window.google.accounts.id.initialize({
+    // Use OAuth 2.0 Token Client for proper popup flow
+    const client = window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,
+      scope: "openid email profile",
       callback: (response) => {
         setLoading(false);
-        if (response?.credential) {
-          onSuccessRef.current(response.credential);
+        if (response?.id_token) {
+          // Backend expects the id_token
+          onSuccessRef.current(response.id_token);
+        } else if (response?.error === "user_cancelled") {
+          // User closed the popup — not an error, just cancelled
+          // Don't show any error message for this
+        } else if (response?.error) {
+          onError?.("Google sign-in cancelled.");
         } else {
-          onError?.("Sign-in cancelled. Please try again.");
+          onError?.("Google sign-in failed. Please try again.");
         }
       },
-      cancel_on_tap_outside: false,
     });
 
-    window.google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed()) {
-        setLoading(false);
-        onError?.(
-          "Popup blocked or Google sign-in unavailable. Please try another method."
-        );
-      }
-      if (notification.isSkippedMoment()) {
-        setLoading(false);
-      }
-    });
+    // This opens the Google account selector popup
+    client.requestAccessToken();
   };
 
   return (
@@ -119,7 +125,7 @@ export default function GoogleSignIn({
       type="button"
       onClick={handleGoogleSignIn}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-700 font-medium"
+      className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-700 font-medium"
     >
       {loading ? (
         <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
