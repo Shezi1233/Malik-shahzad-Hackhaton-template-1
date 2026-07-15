@@ -25,7 +25,7 @@ print(f"   OPENROUTER_API_KEY: {'✅ FOUND' if _raw_openrouter else '❌ NOT FOU
 # Show all env var names (no values!) to debug
 print(f"\n📋 ALL env var names ({len(os.environ)} total):")
 for k in sorted(os.environ.keys()):
-    if k.startswith(("DATABASE", "QDRANT", "GEMINI", "JWT", "OPENROUTER", "BETTER_", "RAILWAY", "PORT")):
+    if k.startswith(("DATABASE", "QDRANT", "GEMINI", "JWT", "OPENROUTER", "BETTER_", "GOOGLE", "RAILWAY", "PORT")):
         print(f"   {k}")
 print("=" * 60)
 
