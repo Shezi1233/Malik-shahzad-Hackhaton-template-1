@@ -43,7 +43,7 @@ app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 @app.on_event("startup")
 def startup():
     """Initialize database tables, seed data, and RAG engine on startup."""
-    print("🚀 SHOP.CO API starting up...")
+    print(f"🚀 SHOP.CO API starting up... (version 2.0 - category shop)")
     print(f"   Database: {settings.DATABASE_URL.split('?')[0][:60]}...")
 
     # Create all tables and seed — wrapped so app starts even if DB is slow
