@@ -74,7 +74,7 @@ export default function Top_sell() {
       {/* View All Link */}
       <div className="flex justify-center mt-8">
         <a
-          href="/products/all"
+          href="/all-products?category=top_selling"
           className="px-16 py-3 border border-gray-300 rounded-full text-gray-600 font-medium hover:bg-gray-50 transition-colors inline-block w-full sm:w-auto text-center"
         >
           View All
