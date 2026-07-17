@@ -428,12 +428,28 @@ _INTENT_PATTERNS = {
     "greeting": r'^(hi|hello|hey|salam|assalam|good\s*(morning|evening|afternoon|day)|yo|wasup|whats up|hlo|howdy|greetings)\b',
     "help": r'^(help|\?|commands|what can you do|how (do|can) you (help|work))',
     "thanks": r'(thanks|thank you|thx|ty|appreciate it|goodbye|bye|see you|have a great)',
-    "order_tracking": r'(order|track|shipping|delivery|where is my|order status|track order|order id)',
     "contact": r'(contact|support|email|phone|customer service|help desk|call|live chat)',
     "discount": r'(discount|promo|coupon|sale|offer|deal|promotion|special offer|save|off|cheap)',
-    "purchase": r'\b(buy|purchase|order|get\s+(me|this|that|it)|add\s+(to|in)\s+cart|i\'?ll\s+take|put\s+(it|this|that)\s+in|checkout|place\s+order|pay\s+(for\s+)?(it|this|that)|i\'?ll\s+get|add\s+it)\b',
-    "size_query": r'\b(size\s*(small|medium|large|x?[xl])\b|\b(small|medium|large|extra\s*large)\b|\bxs\b|\bxl\b|\bxxl\b|\bs\b|\bm\b|\bl\b)',
 }
+
+# Purchase pattern — separate because it uses re.search (anywhere in message)
+# and must be checked BEFORE order_tracking to avoid conflicts
+_PURCHASE_PATTERN = (
+    r'\b('
+    r'buy|purchase|add\s+(to|in)?\s*cart|'
+    r'i\'?ll\s+(take|get|buy|purchase|order)|'
+    r'put\s+(it|this|that)\s+in\s+(the\s+)?cart|'
+    r'checkout|place\s+(an?\s+)?order|'
+    r'want\s+(to\s+)?(buy|purchase|order|get|add)|'
+    r'can\s+(you|i)\s+(buy|purchase|order|get|add)|'
+    r'could\s+(you|i)\s+(buy|purchase|order|get|add)|'
+    r'i\s+(need|want|would\s+like)\s+(to\s+)?(buy|purchase|order|get|add|it|this|that)|'
+    r'pay\s+(for\s+)?(it|this|that)|'
+    r'grab\s+(it|this|that|the)|'
+    r'add\s+it|'
+    r'take\s+(it|this|that|the)'
+    r')\b'
+)
 
 # ── Size normalization ──
 _SIZE_MAP = {
@@ -459,6 +475,13 @@ _COLOR_SET = {
 
 def detect_intent(message: str) -> Optional[str]:
     msg_lower = message.lower().strip()
+
+    # ── Purchase check (uses re.search — matches anywhere in message) ──
+    # Run this FIRST so "I want to order a shirt" is purchase, not order_tracking
+    if re.search(_PURCHASE_PATTERN, msg_lower):
+        return "purchase"
+
+    # ── Other intents (use re.match — anchored to start of string) ──
     for intent, pattern in _INTENT_PATTERNS.items():
         if re.match(pattern, msg_lower):
             return intent
@@ -911,6 +934,36 @@ async def chatbot_chat(req: ChatRequest, db: Session = Depends(get_db)):
                     "I'd love to help you buy that!\n\n"
                     "But first, please **Sign in** so I can add items to your cart. "
                     "Click the **Sign In** button in the top-right corner and come back to me!"
+                )
+            )
+
+        # Check if message actually specifies a product or is just "buy" / "add to cart"
+        purchase_words_removed = re.sub(_PURCHASE_PATTERN, '', msg.lower()).strip()
+        # Also remove common filler words
+        purchase_words_removed = re.sub(r'\b(please|me|for|the|a|an|to|in|some|can|could|i|want|need|would|like|this|that|it|you|my|with|and|or|how)\b', '', purchase_words_removed).strip()
+
+        if not purchase_words_removed or len(purchase_words_removed) < 2:
+            # No product specified — suggest products
+            trending = await asyncio.to_thread(search_products_rag, "trending products clothing")
+            if trending:
+                top = trending[0]
+                return ChatResponse(
+                    reply=(
+                        "Sure! What would you like to buy? 😊\n\n"
+                        f"🔥 **{top['title']}** is trending right now at **${top['price']}**!\n\n"
+                        "Tell me which product you want, like:\n"
+                        "- \"Add the black t-shirt\"\n"
+                        "- \"Buy that hoodie\"\n"
+                        "- \"I'll take the jeans in size M\""
+                    )
+                )
+            return ChatResponse(
+                reply=(
+                    "What would you like to buy? 🛍️\n\n"
+                    "Just tell me the product name, like:\n"
+                    "- \"Add the black t-shirt\"\n"
+                    "- \"Buy those sneakers\"\n"
+                    "- \"I want the skinny jeans\""
                 )
             )
 
