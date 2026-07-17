@@ -1,6 +1,8 @@
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.auth import get_current_user
 from app.config import settings
@@ -9,6 +11,11 @@ from app.models import CartItem, Order, Product
 
 router = APIRouter()
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+class ConfirmPaymentRequest(BaseModel):
+    payment_intent_id: str
+    shipping: dict
 
 
 @router.post("/create-payment-intent")
@@ -56,12 +63,14 @@ async def create_payment_intent(
 
 @router.post("/confirm")
 async def confirm_payment(
-    payment_intent_id: str,
-    shipping: dict,
+    req: ConfirmPaymentRequest,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Confirm payment and create order after Stripe payment succeeds."""
+    payment_intent_id = req.payment_intent_id
+    shipping = req.shipping
+
     # Verify the payment intent belongs to this user and succeeded
     try:
         intent = stripe.PaymentIntent.retrieve(payment_intent_id)

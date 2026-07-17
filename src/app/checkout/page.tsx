@@ -150,7 +150,7 @@ const Checkout = () => {
         client_secret: string;
         amount: number;
         payment_intent_id: string;
-      }>("/payments/create-payment-intent");
+      }>("/payments/create-payment-intent", {});
       setClientSecret(data.client_secret);
       setPaymentIntentId(data.payment_intent_id);
     } catch (err: any) {
