@@ -9,6 +9,7 @@ import Notifications from "./notifications";
 import { IoIosSearch } from "react-icons/io";
 import { IoCartOutline } from "react-icons/io5";
 import { useAuth } from "./authContext";
+import { useCart } from "./cartContext";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -24,6 +25,7 @@ interface SearchProduct {
 
 export default function Header() {
   const { user, signout } = useAuth();
+  const { cart } = useCart();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -206,8 +208,13 @@ export default function Header() {
           <IoIosSearch className="text-2xl" />
         </button>
 
-        <Link href={"/cart"}>
+        <Link href={"/cart"} className="relative">
           <IoCartOutline className="text-2xl sm:text-3xl" />
+          {cart.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-[18px] h-[18px] flex items-center justify-center rounded-full">
+              {cart.length}
+            </span>
+          )}
         </Link>
         <Notifications />
 
