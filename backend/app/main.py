@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.database import Base, SessionLocal, engine
 from app.models import CartItem, Notification, Order, OrderItem, Product, User
-from app.routers import admin, cart, chatbot, notifications, orders, products, users
+from app.routers import admin, cart, chatbot, notifications, orders, payments, products, users
 
 app = FastAPI(title="SHOP.CO API", version="1.0.0")
 
@@ -33,6 +33,7 @@ app.include_router(cart.router, prefix="/api/cart", tags=["Cart"])
 app.include_router(orders.router, prefix="/api/orders", tags=["Orders"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
 app.include_router(chatbot.router, prefix="/api/chatbot", tags=["Chatbot"])
+app.include_router(payments.router, prefix="/api/payments", tags=["Payments"])
 
 # Serve uploaded files
 uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public", "uploads")

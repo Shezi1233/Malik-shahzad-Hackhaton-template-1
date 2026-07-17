@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     OPENROUTER_API_KEY: str = ""
     BETTER_AUTH_SECRET: str = ""
     GOOGLE_CLIENT_ID: str = ""
+    STRIPE_SECRET_KEY: str = ""
 
     model_config = SettingsConfigDict(extra="ignore")
 
@@ -76,6 +77,7 @@ def _load_settings() -> Settings:
         "OPENROUTER_API_KEY": os.environ.get("OPENROUTER_API_KEY"),
         "BETTER_AUTH_SECRET": os.environ.get("BETTER_AUTH_SECRET"),
         "GOOGLE_CLIENT_ID": os.environ.get("GOOGLE_CLIENT_ID"),
+        "STRIPE_SECRET_KEY": os.environ.get("STRIPE_SECRET_KEY"),
     }
 
     for field_name, env_val in direct_overrides.items():

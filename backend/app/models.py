@@ -108,6 +108,8 @@ class Order(Base):
     shipping_postal_code = Column(String(20))
     shipping_country = Column(String(100))
     payment_method = Column(String(50))
+    stripe_payment_intent_id = Column(String(200), nullable=True)
+    payment_status = Column(String(30), default="unpaid")  # unpaid, paid, failed
     created_at = Column(DateTime, default=_utcnow)
 
     user = relationship("User", back_populates="orders")
