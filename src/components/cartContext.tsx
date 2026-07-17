@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useAuth } from "./authContext";
-import { api } from "@/lib/api";
+import { api, invalidateCache } from "@/lib/api";
 
 interface ICartItem {
   id: number;
@@ -73,7 +73,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
     // Clear local cart after sync
     localStorage.removeItem("cart");
-    // Fetch fresh cart from server
+    // Fetch fresh cart from server (bypass cache)
+    invalidateCache("/cart");
     const data = await api.get<{ items: ICartItem[]; total: number }>("/cart");
     setCart(data.items);
   }, [user]);
@@ -101,6 +102,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           size: item.size,
           color: item.color,
         });
+        invalidateCache("/cart");
         const data = await api.get<{ items: ICartItem[]; total: number }>("/cart");
         setCart(data.items);
       } catch (e) {
@@ -126,6 +128,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (user) {
       try {
         await api.delete(`/cart/${id}`);
+        invalidateCache("/cart");
         const data = await api.get<{ items: ICartItem[]; total: number }>("/cart");
         setCart(data.items);
       } catch (e) {
@@ -143,6 +146,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (!item) return;
         const newQty = Math.max(1, item.quantity + amount);
         await api.put(`/cart/${id}`, { quantity: newQty });
+        invalidateCache("/cart");
         const data = await api.get<{ items: ICartItem[]; total: number }>("/cart");
         setCart(data.items);
       } catch (e) {
