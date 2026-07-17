@@ -939,8 +939,16 @@ async def chatbot_chat(req: ChatRequest, db: Session = Depends(get_db)):
 
         # Check if message actually specifies a product or is just "buy" / "add to cart"
         purchase_words_removed = re.sub(_PURCHASE_PATTERN, '', msg.lower()).strip()
-        # Also remove common filler words
-        purchase_words_removed = re.sub(r'\b(please|me|for|the|a|an|to|in|some|can|could|i|want|need|would|like|this|that|it|you|my|with|and|or|how)\b', '', purchase_words_removed).strip()
+        # Also remove common filler words (including vague words like "something")
+        purchase_words_removed = re.sub(
+            r'\b(please|me|for|the|a|an|to|in|some|can|could|i|want|need|would|like|this|that|it|you|my|with|and|or|how|'
+            r'something|anything|everything|nothing|what|when|where|why|which|who|'
+            r'do|does|did|will|would|shall|should|may|might|must|'
+            r'just|only|also|very|really|quite|then|there|here|'
+            r'is|are|was|were|be|been|am|being|has|have|had|'
+            r'no|yes|ok|okay|sure|alright|right)\b',
+            '', purchase_words_removed
+        ).strip()
 
         if not purchase_words_removed or len(purchase_words_removed) < 2:
             # No product specified — suggest products
