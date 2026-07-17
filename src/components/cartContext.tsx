@@ -20,6 +20,7 @@ interface ICartContext {
   removeFromCart: (id: number) => void;
   updateQuantityInCart: (id: number, amount: number) => void;
   cartTotal: number;
+  fetchCart: () => Promise<void>;
 }
 
 const CartContext = createContext<ICartContext | undefined>(undefined);
@@ -165,9 +166,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const cartTotal = cart.reduce((total, item) => total + Number(item.price) * Number(item.quantity), 0);
 
+  const fetchCart = useCallback(async () => {
+    if (!user) return;
+    try {
+      invalidateCache("/cart");
+      const data = await api.get<{ items: ICartItem[]; total: number }>("/cart");
+      setCart(data.items);
+    } catch {
+      setCart([]);
+    }
+  }, [user]);
+
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, updateQuantityInCart, cartTotal }}
+      value={{ cart, addToCart, removeFromCart, updateQuantityInCart, cartTotal, fetchCart }}
+    >
     >
       {children}
     </CartContext.Provider>

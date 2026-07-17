@@ -5,6 +5,7 @@ FULLY RAG-POWERED CHATBOT for SHOP.CO
 - Qdrant Cloud for vector similarity search
 - OpenRouter as fallback LLM
 - SQL keyword search as second fallback
+- PURCHASE INTENT: automatically add products to user's cart
 
 NOTE: All third-party imports (google.genai, qdrant_client, httpx) are lazy
 so the module loads even if optional dependencies are missing.
@@ -22,7 +23,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.models import Product
+from app.models import CartItem, Product, User
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("chatbot")
@@ -34,9 +35,8 @@ router = APIRouter()
 # ──────────────────────────────────────────
 
 COLLECTION_NAME = "shopco_products"
-# Updated model names for the new google.genai SDK
 EMBEDDING_MODEL = "models/gemini-embedding-001"
-EMBEDDING_SIZE = 3072  # models/gemini-embedding-001 produces 3072-dim vectors
+EMBEDDING_SIZE = 3072
 GEMINI_MODEL = "gemini-2.0-flash"
 TOP_K_RESULTS = 6
 SIMILARITY_THRESHOLD = 0.25
@@ -57,7 +57,6 @@ index_ready = False
 
 
 def _import_genai():
-    """Lazy-import and return the google.genai module."""
     try:
         import google.genai as _genai
         return _genai
@@ -66,7 +65,6 @@ def _import_genai():
 
 
 def _import_genai_types():
-    """Lazy-import and return google.genai.types."""
     try:
         from google.genai import types as _types
         return _types
@@ -75,7 +73,6 @@ def _import_genai_types():
 
 
 def _import_qdrant_client():
-    """Lazy-import and return qdrant_client.QdrantClient."""
     try:
         from qdrant_client import QdrantClient as _QdrantClient
         return _QdrantClient
@@ -84,7 +81,6 @@ def _import_qdrant_client():
 
 
 def _import_qdrant_models():
-    """Lazy-import and return qdrant_client.http.models."""
     try:
         from qdrant_client.http import models as _models
         return _models
@@ -93,7 +89,6 @@ def _import_qdrant_models():
 
 
 def get_embedding(text: str) -> List[float]:
-    """Generate embedding via the new Gemini genai SDK."""
     if not genai_client:
         raise RuntimeError("Gemini client not initialized")
     result = genai_client.models.embed_content(
@@ -104,12 +99,7 @@ def get_embedding(text: str) -> List[float]:
 
 
 def enhance_query(query: str) -> str:
-    """
-    Rewrite a natural-language shopping query into a rich product-search query
-    so the embedding captures all key dimensions (category, style, color, size, price).
-    """
     query_lower = query.lower().strip()
-
     replacements = {
         r"\bt[- ]?shirt\b": "t-shirt shirt",
         r"\bhoodie\b": "hoodie sweatshirt",
@@ -123,20 +113,17 @@ def enhance_query(query: str) -> str:
     }
     for pattern, replacement in replacements.items():
         query_lower = re.sub(pattern, replacement, query_lower)
-
     return query_lower
 
 
 def init_rag_engine():
-    """Initialize cloud Qdrant and Gemini (new genai SDK)."""
     global genai_client, qdrant_client, gemini_available, index_ready
 
-    # ── 1. Setup Gemini (new SDK) ──
     if settings.GEMINI_API_KEY:
         try:
             _genai = _import_genai()
             if _genai is None:
-                logger.warning("google-genai package not installed — skipping Gemini setup")
+                logger.warning("google-genai package not installed")
             else:
                 genai_client = _genai.Client(api_key=settings.GEMINI_API_KEY)
                 gemini_available = True
@@ -146,12 +133,11 @@ def init_rag_engine():
     else:
         logger.warning("No GEMINI_API_KEY in .env")
 
-    # ── 2. Setup Qdrant Cloud ──
     if settings.QDRANT_URL and settings.QDRANT_API_KEY:
         try:
             _QdrantClient = _import_qdrant_client()
             if _QdrantClient is None:
-                logger.warning("qdrant-client package not installed — skipping Qdrant setup")
+                logger.warning("qdrant-client package not installed")
             else:
                 qdrant_client = _QdrantClient(
                     url=settings.QDRANT_URL,
@@ -191,7 +177,6 @@ def init_rag_engine():
 
 
 def index_products(db: Session):
-    """Index all products into Qdrant Cloud with embeddings."""
     global index_ready
     if not qdrant_client or not genai_client:
         logger.warning("Cannot index: Qdrant or Gemini not available")
@@ -229,9 +214,7 @@ def index_products(db: Session):
                 f"Rating: {p.rating or 4.5}/5\n"
                 f"Stock: {(p.stock or 10)}"
             )
-
             embedding = get_embedding(product_text)
-
             points.append(_qdrant_models.PointStruct(
                 id=p.id,
                 vector=embedding,
@@ -255,7 +238,6 @@ def index_products(db: Session):
             logger.error(f"  Failed to index {p.title}: {e}")
 
     if points:
-        # Upload in batches of 5 with individual retry
         for i in range(0, len(points), 5):
             batch = points[i:i + 5]
             try:
@@ -266,8 +248,7 @@ def index_products(db: Session):
                 )
                 logger.info(f"  Uploaded batch {i//5 + 1}/{(len(points)-1)//5 + 1}")
             except Exception as batch_err:
-                logger.error(f"  Batch {i//5 + 1} failed, trying one-by-one: {batch_err}")
-                # Fallback: upload individually
+                logger.error(f"  Batch {i//5 + 1} failed: {batch_err}")
                 for point in batch:
                     try:
                         qdrant_client.upsert(
@@ -275,23 +256,19 @@ def index_products(db: Session):
                             points=[point],
                             wait=True,
                         )
-                    except Exception as single_err:
-                        logger.error(f"  Failed to upload product {point.id}: {single_err}")
+                    except Exception:
+                        pass
 
-        # Verify index
         try:
             final_count = qdrant_client.count(COLLECTION_NAME).count
             if final_count > 0:
                 index_ready = True
                 logger.info(f"Indexed {final_count} products into Qdrant Cloud!")
-            else:
-                logger.warning("No products were indexed!")
         except Exception:
             pass
 
 
 def search_products_rag(query: str, top_k: int = TOP_K_RESULTS) -> List[dict]:
-    """Semantic search: query -> embedding -> Qdrant vector search (new query_points API)."""
     if not qdrant_client or not genai_client or not index_ready:
         logger.warning("RAG search not available")
         return []
@@ -299,8 +276,6 @@ def search_products_rag(query: str, top_k: int = TOP_K_RESULTS) -> List[dict]:
     try:
         enhanced = enhance_query(query)
         query_embedding = get_embedding(enhanced)
-
-        # Use the new query_points API (deprecated .search() removed in recent qdrant-client)
         results = qdrant_client.query_points(
             collection_name=COLLECTION_NAME,
             query=query_embedding,
@@ -314,7 +289,6 @@ def search_products_rag(query: str, top_k: int = TOP_K_RESULTS) -> List[dict]:
             logger.info(f"  No Qdrant results for: {query[:50]}")
             return []
 
-        # Filter by score threshold
         hits = [
             point.payload for point in results.points
             if point.payload and point.score >= SIMILARITY_THRESHOLD
@@ -328,10 +302,8 @@ def search_products_rag(query: str, top_k: int = TOP_K_RESULTS) -> List[dict]:
 
 
 def build_rag_context(products: List[dict]) -> str:
-    """Build a detailed product context string for the LLM."""
     if not products:
         return ""
-
     lines = ["Available Products:\n"]
     for i, p in enumerate(products, 1):
         sizes = ", ".join(p.get("sizes", []))
@@ -341,18 +313,15 @@ def build_rag_context(products: List[dict]) -> str:
         rating = p.get("rating", 4.5)
         stock = p.get("stock", 10)
         description = (p.get("description") or "")[:120]
-
         price_str = f"${price}"
         if old_price and old_price > price:
             discount = int(((old_price - price) / old_price) * 100)
             price_str += f" (was ${old_price}, -{discount}%)"
-
         lines.append(
             f"{i}. {p['title']} - {price_str} | Rating: {rating}/5\n"
-           f"   {description}\n"
-           f"   Sizes: {sizes} | Colors: {colors_count} variants | Stock: {stock}\n"
+            f"   {description}\n"
+            f"   Sizes: {sizes} | Colors: {colors_count} variants | Stock: {stock}\n"
         )
-
     return "\n".join(lines)
 
 
@@ -361,44 +330,38 @@ def build_rag_context(products: List[dict]) -> str:
 # ====================================================================
 
 def db_search_fallback(query: str, db: Session) -> List[Product]:
-    """Traditional SQL keyword search as fallback."""
     q = query.lower().strip()
     q = re.sub(
         r'\b(the|a|an|is|are|was|were|do|does|did|have|has|had|show|me|tell|about|for|in|of|to|'
         r'how|much|what|which|where|when|can|i|you|we|they|he|she|it|that|this|with|and|or|but|'
         r'not|please|need|want|looking|find|got|any|some|all|price|cost|size|color|available|'
-        r'stock|hello|hi|hey|thanks|thank|please|help|would|could|should|does|like|has)\b',
+        r'stock|hello|hi|hey|thanks|thank|please|help|would|could|should|does|like|has|buy|add|'
+        r'cart|purchase|order|get|take|put)\b',
         '', q
     ).strip()
 
     if not q or len(q) < 2:
         return []
 
-    # Generate search variations (handle singular/plural)
     search_terms = [q]
     if q.endswith('s') and len(q) > 3:
-        search_terms.append(q[:-1])  # remove trailing 's'
+        search_terms.append(q[:-1])
     if not q.endswith('s'):
-        search_terms.append(q + 's')  # add 's'
+        search_terms.append(q + 's')
 
-    # Search titles with variations
     for term in search_terms:
         products = db.query(Product).filter(Product.title.ilike(f"%{term}%")).all()
         if products:
             return products
 
-    # Search descriptions with variations
     for term in search_terms:
         products = db.query(Product).filter(Product.description.ilike(f"%{term}%")).all()
         if products:
             return products
 
-    # Word-by-word search
     for word in q.split():
         if len(word) > 2:
-            products = db.query(Product).filter(
-                Product.title.ilike(f"%{word}%")
-            ).all()
+            products = db.query(Product).filter(Product.title.ilike(f"%{word}%")).all()
             if products:
                 return products
 
@@ -410,20 +373,18 @@ def db_search_fallback(query: str, db: Session) -> List[Product]:
 # ====================================================================
 
 async def query_openrouter(system_prompt: str, user_message: str) -> Optional[str]:
-    """Send a chat completion request to OpenRouter as primary LLM."""
     if not settings.OPENROUTER_API_KEY:
         return None
-
     try:
         import httpx
     except ImportError:
-        logger.warning("httpx not installed — skipping OpenRouter")
+        logger.warning("httpx not installed")
         return None
 
     models_to_try = [
-        "google/gemini-2.0-flash-001",  # Fast & cheap
-        "openai/gpt-4o-mini",            # Widely available
-        "meta-llama/llama-3.3-70b-instruct", # Open source fallback
+        "google/gemini-2.0-flash-001",
+        "openai/gpt-4o-mini",
+        "meta-llama/llama-3.3-70b-instruct",
     ]
 
     for model in models_to_try:
@@ -443,31 +404,24 @@ async def query_openrouter(system_prompt: str, user_message: str) -> Optional[st
                             {"role": "user", "content": user_message},
                         ],
                         "temperature": 0.7,
-                        "max_tokens": 500,
+                        "max_tokens": 600,
                     },
                 )
                 if response.status_code != 200:
-                    error_body = response.text[:200]
-                    logger.warning(f"OpenRouter {model} returned {response.status_code}: {error_body}")
                     continue
-
                 result = response.json()
                 if "choices" in result and len(result["choices"]) > 0:
                     content = result["choices"][0].get("message", {}).get("content", "").strip()
                     if content:
                         return content
-                    logger.warning(f"OpenRouter {model} returned empty content")
-                else:
-                    logger.warning(f"OpenRouter {model} returned no choices: {result.get('error', 'unknown')}")
         except Exception as e:
             logger.warning(f"OpenRouter {model} error: {e}")
             continue
-
     return None
 
 
 # ====================================================================
-#  INTENT DETECTION (Rule-based for fast common replies)
+#  INTENT DETECTION
 # ====================================================================
 
 _INTENT_PATTERNS = {
@@ -477,6 +431,29 @@ _INTENT_PATTERNS = {
     "order_tracking": r'(order|track|shipping|delivery|where is my|order status|track order|order id)',
     "contact": r'(contact|support|email|phone|customer service|help desk|call|live chat)',
     "discount": r'(discount|promo|coupon|sale|offer|deal|promotion|special offer|save|off|cheap)',
+    "purchase": r'\b(buy|purchase|order|get\s+(me|this|that|it)|add\s+(to|in)\s+cart|i\'?ll\s+take|put\s+(it|this|that)\s+in|checkout|place\s+order|pay\s+(for\s+)?(it|this|that)|i\'?ll\s+get|add\s+it)\b',
+    "size_query": r'\b(size\s*(small|medium|large|x?[xl])\b|\b(small|medium|large|extra\s*large)\b|\bxs\b|\bxl\b|\bxxl\b|\bs\b|\bm\b|\bl\b)',
+}
+
+# ── Size normalization ──
+_SIZE_MAP = {
+    "xs": "XS", "extra small": "XS",
+    "s": "S", "small": "S",
+    "m": "M", "medium": "M",
+    "l": "L", "large": "L",
+    "xl": "XL", "extra large": "XL",
+    "xxl": "XXL", "extra extra large": "XXL",
+}
+
+# ── Common colors ──
+_COLOR_SET = {
+    "black", "white", "red", "blue", "green", "navy", "gray", "grey",
+    "brown", "pink", "purple", "yellow", "orange", "beige", "cream",
+    "maroon", "teal", "olive", "coral", "mint", "lavender", "tan",
+    "khaki", "indigo", "violet", "gold", "silver", "bronze", "burgundy",
+    "charcoal", "chocolate", "crimson", "cyan", "emerald", "fuchsia",
+    "ivory", "magenta", "mustard", "peach", "plum", "rose", "ruby",
+    "salmon", "sapphire", "scarlet", "turquoise", "wine",
 }
 
 
@@ -488,6 +465,179 @@ def detect_intent(message: str) -> Optional[str]:
     return None
 
 
+def extract_size(message: str) -> Optional[str]:
+    """Extract clothing size from user message."""
+    msg_lower = message.lower().strip()
+
+    # Direct size mentions
+    for size_variant, normalized in _SIZE_MAP.items():
+        pattern = r'\b' + re.escape(size_variant) + r'\b'
+        if re.search(pattern, msg_lower):
+            return normalized
+
+    # "size S" / "size M" etc
+    size_match = re.search(r'\bsize\s+([a-z]{1,3})\b', msg_lower)
+    if size_match:
+        raw = size_match.group(1)
+        if raw in _SIZE_MAP:
+            return _SIZE_MAP[raw]
+
+    return None
+
+
+def extract_color(message: str) -> Optional[str]:
+    """Extract color name from user message."""
+    msg_lower = message.lower().strip()
+    for color in _COLOR_SET:
+        pattern = r'\b' + re.escape(color) + r'\b'
+        if re.search(pattern, msg_lower):
+            return color.capitalize()
+    return None
+
+
+# ====================================================================
+#  AUTH: Extract user from token
+# ====================================================================
+
+def get_user_from_token(access_token: str, db: Session) -> Optional[User]:
+    """Decode JWT token and return User or None."""
+    try:
+        from jose import JWTError, jwt
+        payload = jwt.decode(
+            access_token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
+        )
+        user_id = payload.get("user_id")
+        if not user_id:
+            return None
+        user = db.query(User).filter(User.id == user_id).first()
+        return user
+    except Exception as e:
+        logger.warning(f"Token decode failed: {e}")
+        return None
+
+
+# ====================================================================
+#  PURCHASE HANDLER
+# ====================================================================
+
+async def handle_purchase_intent(
+    user_msg: str,
+    user: User,
+    db: Session,
+) -> dict:
+    """
+    Fully automated purchase handler.
+    1. Search for the product (RAG then SQL fallback)
+    2. Extract size/color from message
+    3. Add to cart
+    4. Return action data
+    """
+    # Step 1: Find the product
+    candidates = await asyncio.to_thread(search_products_rag, user_msg)
+    found_product = None
+
+    if candidates:
+        found_product = candidates[0]
+    else:
+        db_products = await asyncio.to_thread(db_search_fallback, user_msg, db)
+        if db_products:
+            found_product = {
+                "product_id": db_products[0].id,
+                "title": db_products[0].title,
+                "price": db_products[0].price,
+                "img_url": db_products[0].img_url,
+                "sizes": db_products[0].get_sizes(),
+                "colors": db_products[0].get_colors(),
+                "slug": db_products[0].slug,
+            }
+
+    if not found_product:
+        return {
+            "success": False,
+            "error": "not_found",
+            "product_title": None,
+            "message": "I searched but couldn't find that product. Could you describe it differently?",
+        }
+
+    # Step 2: Extract size and color
+    size = extract_size(user_msg)
+    color = extract_color(user_msg)
+
+    product_id = found_product["product_id"]
+    product_title = found_product["title"]
+    available_sizes = found_product.get("sizes", [])
+    available_colors = found_product.get("colors", [])
+
+    # Validate size
+    if size and available_sizes and size not in available_sizes:
+        size = available_sizes[0]  # fall back to first available
+
+    # Validate color
+    if color and available_colors:
+        # Check if extracted color exists in available colors (case-insensitive)
+        color_match = next(
+            (c for c in available_colors if c.lower() == color.lower()),
+            None
+        )
+        if color_match:
+            color = color_match
+        else:
+            color = None  # color not available for this product
+
+    # Step 3: Add to cart
+    try:
+        # Check if item already exists
+        existing = (
+            db.query(CartItem)
+            .filter(
+                CartItem.user_id == user.id,
+                CartItem.product_id == product_id,
+                CartItem.size == size,
+                CartItem.color == color,
+            )
+            .first()
+        )
+
+        if existing:
+            existing.quantity += 1
+        else:
+            cart_item = CartItem(
+                user_id=user.id,
+                product_id=product_id,
+                quantity=1,
+                size=size,
+                color=color,
+            )
+            db.add(cart_item)
+
+        db.commit()
+
+        size_str = f" (Size: {size})" if size else ""
+        color_str = f" ({color})" if color else ""
+        details = f"{product_title}{size_str}{color_str}"
+
+        return {
+            "success": True,
+            "error": None,
+            "product_title": product_title,
+            "product_id": product_id,
+            "size": size,
+            "color": color,
+            "message": f"✅ Added **{details}** to your cart!",
+            "cart_url": "/cart",
+            "product_url": f"/products/{product_id}",
+        }
+    except Exception as e:
+        logger.error(f"Cart add error: {e}")
+        db.rollback()
+        return {
+            "success": False,
+            "error": "db_error",
+            "product_title": product_title,
+            "message": "Sorry, I couldn't add the item to your cart due to a technical issue. Please try again.",
+        }
+
+
 _INTENT_RESPONSES = {
     "greeting": (
         "Welcome to SHOP.CO! \n\n"
@@ -497,7 +647,7 @@ _INTENT_RESPONSES = {
         "- \"What's under $150?\"\n"
         "- \"Do you have skinny jeans?\"\n"
         "- \"What's new this week?\"\n"
-        "- \"Recommend something casual\"\n\n"
+        "- \"Add the black t-shirt to my cart\"\n\n"
         "What are you looking for today?"
     ),
     "help": (
@@ -508,12 +658,12 @@ _INTENT_RESPONSES = {
         "- New arrivals -- \"What's new this week?\"\n"
         "- Best sellers -- \"What's trending?\"\n"
         "- Offers -- \"Any discounts or promo codes?\"\n"
-        "- Orders -- \"Track my order\"\n\n"
+        "- **Buy** -- \"Add the black hoodie to my cart\" or \"I'll take the jeans\"\n\n"
         "Just chat naturally and I'll handle the rest!"
     ),
     "thanks": (
         "You're welcome! Happy shopping at SHOP.CO! \n\n"
-        "Come back anytime if you need help finding something perfect!"
+        "Come back anytime if you need help finding or buying something!"
     ),
     "order_tracking": (
         "Track Your Order\n\n"
@@ -530,22 +680,31 @@ _INTENT_RESPONSES = {
     ),
     "discount": (
         "Current Offers & Promotions!\n\n"
-        "- Use code DISCOUNT10 -> Get $30 OFF your order\n"
-        "- New customers -> 20% OFF your first order\n"
+        "- Use code **DISCOUNT10** -> **$30 OFF** your order\n"
         "- Free delivery on all orders over $100\n\n"
-        "Start shopping and save big!\n\n"
         "Want me to show you products under a certain budget?"
     ),
 }
 
 
 # ====================================================================
-#  LLM GENERATION (Gemini new genai SDK + OpenRouter fallback)
+#  PURCHASE SYSTEM PROMPT EXTENSION
 # ====================================================================
+
+_PURCHASE_SYSTEM_INSTRUCTION = (
+    "\n\n## PURCHASE CAPABILITY\n"
+    "- When a customer says 'buy', 'add to cart', 'I'll take it', 'purchase', or similar — "
+    "you can automatically add the product to their cart.\n"
+    "- If they mention a product without a size, ask \"Which size would you like?\"\n"
+    "- If they mention a product without a color preference, that's fine — just proceed.\n"
+    "- **You do NOT need to ask for confirmation** — the system handles it automatically.\n"
+    "- After adding, confirm: \"I've added [product] to your cart!\"\n"
+    "- If the user just says 'yes' or 'buy it' after a recommendation, the system will add the recommended product.\n"
+)
 
 _SYSTEM_PROMPT_BASE = (
     "You are a friendly, enthusiastic shopping assistant for SHOP.CO, a premium clothing store. "
-    "Your goal is to help customers find the perfect products.\n\n"
+    "Your goal is to help customers find and buy the perfect products.\n\n"
     "## RESPONSE STYLE\n"
     "- Keep replies concise (2-5 sentences), natural, and helpful\n"
     "- Use emojis occasionally for warmth\n"
@@ -564,8 +723,11 @@ _SYSTEM_PROMPT_BASE = (
 )
 
 
+# ====================================================================
+#  LLM GENERATION
+# ====================================================================
+
 async def generate_with_gemini(system_prompt: str, user_msg: str) -> Optional[str]:
-    """Generate response using new Gemini genai SDK."""
     if not genai_client or not gemini_available:
         return None
 
@@ -594,14 +756,12 @@ async def generate_with_gemini(system_prompt: str, user_msg: str) -> Optional[st
     return None
 
 
-async def generate_response(user_msg: str, context: str) -> str:
-    """
-    Generate a response using the best available LLM:
-    1. Try OpenRouter first (has available quota)
-    2. Fallback to Gemini
-    3. Graceful message if both fail
-    """
+async def generate_response(user_msg: str, context: str, is_purchase: bool = False) -> str:
     system_prompt = _SYSTEM_PROMPT_BASE
+
+    if is_purchase:
+        system_prompt += _PURCHASE_SYSTEM_INSTRUCTION
+
     if context:
         system_prompt += f"\n\n## RELEVANT PRODUCTS\n{context}"
     else:
@@ -610,12 +770,10 @@ async def generate_response(user_msg: str, context: str) -> str:
             "Suggest the customer browse categories or ask what they're looking for."
         )
 
-    # Try OpenRouter first (has available quota)
     reply = await query_openrouter(system_prompt, user_msg)
     if reply:
         return reply
 
-    # Fallback to Gemini
     logger.info("OpenRouter failed, trying Gemini fallback...")
     reply = await generate_with_gemini(system_prompt, user_msg)
     if reply:
@@ -628,26 +786,17 @@ async def generate_response(user_msg: str, context: str) -> str:
 
 
 # ====================================================================
-#  RAG PIPELINE (Main flow)
+#  RAG PIPELINE
 # ====================================================================
 
-async def rag_pipeline(user_msg: str, db: Session) -> str:
-    """
-    Full RAG pipeline:
-    1. Search Qdrant for semantically similar products
-    2. If found, build context and generate with LLM
-    3. If no vector results, try SQL text search
-    4. Last resort: suggest browsing
-    """
-    # Step 1: Vector Search (RAG)
+async def rag_pipeline(user_msg: str, db: Session, is_purchase: bool = False) -> str:
     candidates = await asyncio.to_thread(search_products_rag, user_msg)
 
     if candidates:
         context = build_rag_context(candidates)
-        reply = await generate_response(user_msg, context)
+        reply = await generate_response(user_msg, context, is_purchase)
         return reply
 
-    # Step 2: SQL Fallback
     logger.info("No RAG results, trying SQL fallback...")
     db_products = await asyncio.to_thread(db_search_fallback, user_msg, db)
 
@@ -660,10 +809,9 @@ async def rag_pipeline(user_msg: str, db: Session) -> str:
                 f"  {p.description or ''}\n"
             )
         simple_context = "\n".join(lines)
-        reply = await generate_response(user_msg, simple_context)
+        reply = await generate_response(user_msg, simple_context, is_purchase)
         return reply
 
-    # Step 3: Show some products as last resort
     all_products = await asyncio.to_thread(
         lambda: db.query(Product).limit(6).all()
     )
@@ -684,10 +832,13 @@ async def rag_pipeline(user_msg: str, db: Session) -> str:
 
 class ChatRequest(BaseModel):
     message: str
+    access_token: Optional[str] = None
+    history: Optional[List[dict]] = None
 
 
 class ChatResponse(BaseModel):
     reply: str
+    action: Optional[dict] = None
 
 
 # ====================================================================
@@ -696,7 +847,6 @@ class ChatResponse(BaseModel):
 
 @router.get("/status")
 def chatbot_status():
-    """Check the status of all RAG components."""
     return {
         "gemini_available": gemini_available,
         "qdrant_connected": qdrant_client is not None,
@@ -709,11 +859,8 @@ def chatbot_status():
 
 @router.post("/reindex")
 def reindex(db: Session = Depends(get_db)):
-    """Force re-index all products into Qdrant Cloud."""
     global index_ready
-
     _qdrant_models = _import_qdrant_models()
-
     index_ready = False
     if qdrant_client:
         try:
@@ -731,7 +878,6 @@ def reindex(db: Session = Depends(get_db)):
                 )
             except Exception as e:
                 logger.error(f"Re-create collection error: {e}")
-
     init_rag_engine()
     index_products(db)
     return {"message": "Re-indexed successfully", "index_ready": index_ready}
@@ -740,31 +886,89 @@ def reindex(db: Session = Depends(get_db)):
 @router.post("", response_model=ChatResponse)
 async def chatbot_chat(req: ChatRequest, db: Session = Depends(get_db)):
     """
-    Main chat endpoint.
-    1. Quick intent detection for common queries (instant reply)
-    2. Full RAG pipeline for everything else
+    Main chat endpoint with purchase automation.
+    1. Quick intent detection for fast replies
+    2. Purchase intent → auto-add to cart (requires auth)
+    3. Full RAG pipeline for everything else
     """
     msg = req.message.strip()
     if not msg:
         return ChatResponse(reply="Please say something!")
 
-    # Quick Intent Detection
+    # ── Detect intent ──
     intent = detect_intent(msg)
+
+    # ── PURCHASE INTENT ──
+    if intent == "purchase":
+        # Need authentication
+        user = None
+        if req.access_token:
+            user = get_user_from_token(req.access_token, db)
+
+        if not user:
+            return ChatResponse(
+                reply=(
+                    "I'd love to help you buy that!\n\n"
+                    "But first, please **Sign in** so I can add items to your cart. "
+                    "Click the **Sign In** button in the top-right corner and come back to me!"
+                )
+            )
+
+        # Process the purchase
+        result = await handle_purchase_intent(msg, user, db)
+
+        if result["success"]:
+            # Generate a friendly LLM response to accompany the cart action
+            product_info = result.get("product_title", "")
+            size_str = f" in size {result['size']}" if result.get("size") else ""
+            color_str = f" ({result['color']})" if result.get("color") else ""
+            detail = f"{product_info}{color_str}{size_str}"
+
+            # Use RAG to find context for the reply
+            candidates = await asyncio.to_thread(search_products_rag, msg)
+            context = build_rag_context(candidates) if candidates else ""
+            llm_reply = await generate_response(
+                f"I want to confirm that {detail} was just added to my cart. Give a friendly confirmation message.",
+                context,
+                is_purchase=True,
+            )
+
+            return ChatResponse(
+                reply=llm_reply or result["message"],
+                action={
+                    "type": "add_to_cart",
+                    "title": result["product_title"],
+                    "product_id": result["product_id"],
+                    "size": result.get("size"),
+                    "color": result.get("color"),
+                    "cart_url": "/cart",
+                    "product_url": result.get("product_url"),
+                }
+            )
+        else:
+            if result.get("error") == "not_found":
+                return ChatResponse(
+                    reply=result["message"],
+                )
+            return ChatResponse(
+                reply=result["message"],
+            )
+
+    # ── INTENT DETECTION (fast replies) ──
     if intent and intent in _INTENT_RESPONSES:
         if intent in ("greeting", "help"):
-            # Enrich greeting with a trending product suggestion
             candidates = await asyncio.to_thread(
                 search_products_rag, "trending products clothing"
             )
             if candidates:
                 top = candidates[0]
                 extra = (
-                    f"\n\nHot pick: {top['title']} -- just ${top['price']}! "
+                    f"\n\n🔥 Hot pick: **{top['title']}** — just **${top['price']}**! "
                     f"Want to know more?"
                 )
                 return ChatResponse(reply=_INTENT_RESPONSES[intent] + extra)
         return ChatResponse(reply=_INTENT_RESPONSES[intent])
 
-    # Full RAG Pipeline
+    # ── FULL RAG PIPELINE ──
     reply = await rag_pipeline(msg, db)
     return ChatResponse(reply=reply)
