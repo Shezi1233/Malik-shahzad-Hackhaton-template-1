@@ -165,6 +165,7 @@ const Checkout = () => {
     if (user && cart.length > 0 && !clientSecret) {
       createPaymentIntent();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, cart]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
