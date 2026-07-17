@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
-export default function CheckoutSuccess() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const paymentIntentId = searchParams.get("payment_intent");
   const clientSecret = searchParams.get("payment_intent_client_secret");
@@ -124,5 +124,22 @@ export default function CheckoutSuccess() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutSuccess() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-600 font-medium">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }
