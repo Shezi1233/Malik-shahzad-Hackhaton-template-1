@@ -83,7 +83,7 @@ class CartItem(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, default=1)
     size = Column(String(10), nullable=True)
@@ -98,7 +98,7 @@ class Order(Base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     status = Column(String(20), default="pending")
     subtotal = Column(Float, nullable=False)
     discount = Column(Float, default=0)
@@ -161,6 +161,24 @@ class WishlistItem(Base):
     created_at = Column(DateTime, default=_utcnow)
 
     user = relationship("User", back_populates="wishlist_items")
+    product = relationship("Product")
+
+
+class Review(Base):
+    __tablename__ = "reviews"
+    __table_args__ = (
+        UniqueConstraint("user_id", "product_id", name="uq_user_product_review"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    rating = Column(Integer, nullable=False)
+    title = Column(String(200), nullable=True)
+    comment = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=_utcnow)
+
+    user = relationship("User")
     product = relationship("Product")
 
 

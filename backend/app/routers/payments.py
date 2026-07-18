@@ -153,6 +153,86 @@ async def confirm_payment(
     }
 
 
+
+
+class GuestCartItem(BaseModel):
+    product_id: int
+    quantity: int = 1
+    size: Optional[str] = None
+    color: Optional[str] = None
+
+
+class GuestCheckoutRequest(BaseModel):
+    shipping: dict
+    cart_items: list[GuestCartItem]
+
+
+@router.post("/guest-checkout")
+def guest_checkout(
+    req: GuestCheckoutRequest,
+    db: Session = Depends(get_db),
+):
+    """Checkout without signing in - creates a guest order."""
+    if not req.cart_items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
+    shipping = req.shipping
+    subtotal = 0.0
+
+    for item in req.cart_items:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product #{item.product_id} not found")
+        if product.stock is not None and item.quantity > product.stock:
+            raise HTTPException(status_code=400, detail=f"Insufficient stock for {product.title}")
+        if product.stock is not None:
+            product.stock -= item.quantity
+        subtotal += product.price * item.quantity
+
+    discount = _get_discount(shipping.get("promo_code", "") or "", db)
+    delivery_fee = 15
+    tax_amount = round(subtotal * 0.08, 2)
+    total = subtotal - discount + delivery_fee + tax_amount
+
+    order = Order(
+        user_id=None,
+        status="pending",
+        subtotal=subtotal,
+        discount=discount,
+        delivery_fee=delivery_fee,
+        tax_amount=tax_amount,
+        total=total,
+        shipping_name=shipping.get("shipping_name", ""),
+        shipping_email=shipping.get("shipping_email", ""),
+        shipping_address=shipping.get("shipping_address", ""),
+        shipping_city=shipping.get("shipping_city", ""),
+        shipping_postal_code=shipping.get("shipping_postal_code", ""),
+        shipping_country=shipping.get("shipping_country", ""),
+        payment_method="guest_cod",
+        payment_status="unpaid",
+    )
+    db.add(order)
+    db.flush()
+
+    for item in req.cart_items:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if product:
+            from app.models import OrderItem
+            db.add(OrderItem(
+                order_id=order.id,
+                product_id=product.id,
+                title=product.title,
+                price=product.price,
+                quantity=item.quantity,
+                size=item.size,
+                color=item.color,
+            ))
+
+    db.commit()
+    db.refresh(order)
+    return {"order_id": order.id, "status": "pending", "total": total, "payment_method": "cod"}
+
+
 class CODPaymentRequest(BaseModel):
     shipping: dict
 

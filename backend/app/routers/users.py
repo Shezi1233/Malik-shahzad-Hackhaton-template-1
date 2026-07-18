@@ -1,7 +1,9 @@
+import os
+import shutil
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.auth import (
@@ -211,3 +213,31 @@ def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Password has been reset successfully. You can now sign in with your new password."}
+
+
+AVATAR_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "public", "uploads", "avatars")
+os.makedirs(AVATAR_DIR, exist_ok=True)
+
+
+@router.post("/avatar")
+def upload_avatar(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Upload a profile avatar image."""
+    ext = os.path.splitext(file.filename or ".png")[1].lower()
+    if ext not in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
+        raise HTTPException(status_code=400, detail="Invalid file type")
+
+    filename = f"avatar_{current_user.id}_{uuid.uuid4().hex[:8]}{ext}"
+    filepath = os.path.join(AVATAR_DIR, filename)
+
+    with open(filepath, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    avatar_url = f"/uploads/avatars/{filename}"
+    current_user.avatar_url = avatar_url
+    db.commit()
+
+    return {"avatar_url": avatar_url}

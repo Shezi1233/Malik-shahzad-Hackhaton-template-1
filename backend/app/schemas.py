@@ -317,3 +317,31 @@ class PromoCodeValidateResponse(BaseModel):
     valid: bool
     discount_amount: float = 0
     message: str = ""
+
+
+# ===== REVIEW SCHEMAS =====
+class ReviewCreate(BaseModel):
+    product_id: int
+    rating: int
+    title: Optional[str] = None
+    comment: Optional[str] = None
+
+
+class ReviewResponse(BaseModel):
+    id: int
+    product_id: int
+    user_id: int
+    username: str = ""
+    rating: int
+    title: Optional[str] = None
+    comment: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ReviewStats(BaseModel):
+    average_rating: float = 0
+    total_reviews: int = 0
+    distribution: dict = {}

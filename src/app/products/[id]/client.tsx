@@ -356,6 +356,7 @@ export default function ProductDetailClient({ productId }: { productId?: number 
           </motion.div>
         </div>
       </div>
+      <ProductReviews productId={product?.id || Number(params.id)} />
       <AllReviw />
       <Tshirts />
       <Chatbot />

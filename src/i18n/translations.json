@@ -1,0 +1,20 @@
+{
+  "en": {
+    "nav": { "home": "Home", "products": "Products", "cart": "Cart", "signin": "Sign In" },
+    "product": { "addToCart": "Add to Cart", "added": "Added!", "sizes": "Sizes", "colors": "Colors" },
+    "cart": { "title": "Your Cart", "empty": "Your cart is empty", "checkout": "Go To Checkout" },
+    "common": { "loading": "Loading...", "error": "Something went wrong", "retry": "Try Again" }
+  },
+  "ur": {
+    "nav": { "home": "ہوم", "products": "مصنوعات", "cart": "کارٹ", "signin": "سائن ان" },
+    "product": { "addToCart": "کارٹ میں شامل کریں", "added": "شامل ہوگیا!", "sizes": "سائز", "colors": "رنگ" },
+    "cart": { "title": "آپ کی کارٹ", "empty": "آپ کی کارٹ خالی ہے", "checkout": "چیک آؤٹ پر جائیں" },
+    "common": { "loading": "لوڈ ہو رہا ہے...", "error": "کچھ غلط ہو گیا", "retry": "دوبارہ کوشش کریں" }
+  },
+  "ar": {
+    "nav": { "home": "الرئيسية", "products": "المنتجات", "cart": "السلة", "signin": "تسجيل الدخول" },
+    "product": { "addToCart": "أضف إلى السلة", "added": "تمت الإضافة!", "sizes": "المقاسات", "colors": "الألوان" },
+    "cart": { "title": "سلتك", "empty": "سلتك فارغة", "checkout": "الذهاب إلى الدفع" },
+    "common": { "loading": "جار التحميل...", "error": "حدث خطأ ما", "retry": "حاول مرة أخرى" }
+  }
+}
