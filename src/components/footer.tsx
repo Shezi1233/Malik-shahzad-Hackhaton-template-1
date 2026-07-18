@@ -6,7 +6,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <main className="bg-[#F0F0F0] w-full h-full md:h-[450px] relative mt-20 sm:mt-32 max-w-screen-2xl mx-auto">
+    <div className="w-full bg-[#F0F0F0]"><main className="w-full h-full md:h-[450px] relative mt-20 sm:mt-32 max-w-screen-2xl mx-auto">
       {/*  */}
       <div className="absolute top-[-60px] sm:top-[-80px] left-0 right-0 z-10">
         <Offers />
@@ -113,7 +113,8 @@ export default function Footer() {
             alt="pic"
           />
         </div>
-      </div>
+          </div>
+</div>
     </main>
   );
 }

@@ -64,7 +64,7 @@ export default function CustomerCarousel() {
         <div className="w-full md:w-[80%] px-3 md:p-0">
           {/* Header */}
           <div className="flex justify-between items-start">
-            <img className="mt-5 sm:mt-11 max-w-full h-auto w-[200px] sm:w-auto" src="/images/customer.png" alt="" />
+            <img className="mt-5 sm:mt-11 max-w-full h-auto w-full max-w-[200px] sm:w-auto" src="/images/customer.png" alt="" />
           </div>
           <div className="relative mt-4 sm:mt-10">
             <Carousel className="w-full">

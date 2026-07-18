@@ -97,7 +97,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full h-[60px] bg-white flex justify-between items-center max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
+    <div className="w-full bg-white"><header className="h-[60px] flex justify-between items-center max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
       {/* left */}
       <div className="flex justify-center items-center text-black font-black">
         <SheetSide />
@@ -273,6 +273,6 @@ export default function Header() {
           </Link>
         )}
       </div>
-    </header>
+    </header></div>
   );
 }
