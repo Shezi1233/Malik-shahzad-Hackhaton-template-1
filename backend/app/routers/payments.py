@@ -98,8 +98,7 @@ async def confirm_payment(
     discount = _get_discount(shipping.get("promo_code", "") or "", db)
 
     delivery_fee = 15
-    tax_amount = round(subtotal * 0.08, 2)
-    total = subtotal - discount + delivery_fee + tax_amount
+    total = subtotal - discount + delivery_fee
 
     # Create order
     order = Order(
@@ -108,7 +107,6 @@ async def confirm_payment(
         subtotal=subtotal,
         discount=discount,
         delivery_fee=delivery_fee,
-        tax_amount=tax_amount,
         total=total,
         shipping_name=shipping.get("shipping_name", ""),
         shipping_email=shipping.get("shipping_email", ""),
@@ -191,8 +189,7 @@ def guest_checkout(
 
     discount = _get_discount(shipping.get("promo_code", "") or "", db)
     delivery_fee = 15
-    tax_amount = round(subtotal * 0.08, 2)
-    total = subtotal - discount + delivery_fee + tax_amount
+    total = subtotal - discount + delivery_fee
 
     order = Order(
         user_id=None,
@@ -200,7 +197,6 @@ def guest_checkout(
         subtotal=subtotal,
         discount=discount,
         delivery_fee=delivery_fee,
-        tax_amount=tax_amount,
         total=total,
         shipping_name=shipping.get("shipping_name", ""),
         shipping_email=shipping.get("shipping_email", ""),
@@ -259,8 +255,7 @@ def confirm_cod_payment(
     discount = _get_discount(shipping.get("promo_code", "") or "", db)
 
     delivery_fee = 15
-    tax_amount = round(subtotal * 0.08, 2)
-    total = subtotal - discount + delivery_fee + tax_amount
+    total = subtotal - discount + delivery_fee
 
     # Create order with COD status
     order = Order(
@@ -269,7 +264,6 @@ def confirm_cod_payment(
         subtotal=subtotal,
         discount=discount,
         delivery_fee=delivery_fee,
-        tax_amount=tax_amount,
         total=total,
         shipping_name=shipping.get("shipping_name", ""),
         shipping_email=shipping.get("shipping_email", ""),

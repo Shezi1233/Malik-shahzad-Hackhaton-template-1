@@ -101,7 +101,6 @@ class Order(Base):
     subtotal = Column(Float, nullable=False)
     discount = Column(Float, default=0)
     delivery_fee = Column(Float, default=15)
-    tax_amount = Column(Float, default=0)
     total = Column(Float, nullable=False)
     shipping_name = Column(String(200))
     shipping_email = Column(String(255))

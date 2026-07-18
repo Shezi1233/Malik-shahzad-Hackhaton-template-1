@@ -41,7 +41,6 @@ def _build_order_response(order: Order) -> OrderResponse:
         subtotal=order.subtotal,
         discount=order.discount,
         delivery_fee=order.delivery_fee,
-        tax_amount=order.tax_amount or 0,
         total=order.total,
         shipping_name=order.shipping_name,
         shipping_email=order.shipping_email,
@@ -86,8 +85,7 @@ def create_order(
     discount = _get_discount(req.promo_code or "", db)
 
     delivery_fee = 15
-    tax_amount = round(subtotal * 0.08, 2)
-    total = subtotal - discount + delivery_fee + tax_amount
+    total = subtotal - discount + delivery_fee
 
     # Create order
     order = Order(
@@ -96,7 +94,6 @@ def create_order(
         subtotal=subtotal,
         discount=discount,
         delivery_fee=delivery_fee,
-        tax_amount=tax_amount,
         total=total,
         shipping_name=req.shipping_name,
         shipping_email=req.shipping_email,

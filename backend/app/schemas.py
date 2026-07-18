@@ -143,7 +143,6 @@ class OrderResponse(BaseModel):
     subtotal: float
     discount: float
     delivery_fee: float
-    tax_amount: float = 0
     total: float
     shipping_name: str
     shipping_email: str
