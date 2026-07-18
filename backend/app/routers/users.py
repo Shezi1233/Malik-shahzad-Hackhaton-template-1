@@ -14,8 +14,8 @@ from app.config import settings
 from app.database import get_db
 from app.models import User
 from app.schemas import (
-    ForgotPasswordRequest,
-    GoogleAuthRequest,TokenResponse,
+    GoogleAuthRequest,
+    TokenResponse,
     UserResponse,
     UserSigninRequest,
     UserSignupRequest,
@@ -165,5 +165,3 @@ def update_profile(
     db.commit()
     db.refresh(current_user)
     return UserResponse.model_validate(current_user)
-
-
