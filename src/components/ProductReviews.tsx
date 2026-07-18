@@ -34,7 +34,7 @@ export default function ProductReviews({ productId }: { productId: number }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const fetchReviews = () => {
+  const fetchReviews = () => { // eslint-disable-line react-hooks/exhaustive-deps
     setLoading(true);
     Promise.all([
       api.get<Review[]>(`/reviews/product/${productId}`),
@@ -48,7 +48,7 @@ export default function ProductReviews({ productId }: { productId: number }) {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { fetchReviews(); }, [productId]);
+  useEffect(() => { fetchReviews(); }, [productId, fetchReviews]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -14,6 +14,7 @@ import { fadeIn } from "@/components/variants";
 import { useCart } from "@/components/cartContext";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
+import ProductReviews from "@/components/ProductReviews";
 
 let star = [
   <FaStar key={1} />,
@@ -118,7 +119,7 @@ export default function ProductDetailClient({ productId }: { productId?: number 
       })
       .catch(() => setProduct(null))
       .finally(() => setLoading(false));
-  }, [params.id]);
+  }, [params.id, productId]);
 
   if (loading) {
     return (

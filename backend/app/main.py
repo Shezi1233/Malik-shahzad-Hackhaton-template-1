@@ -16,11 +16,7 @@ app = FastAPI(title="SHOP.CO API", version="1.0.0")
 
 # CORS - restrict in production (allow Vercel domains via regex), allow all in local dev
 _is_production = "postgresql" in settings.DATABASE_URL or "postgres" in settings.DATABASE_URL
-cors_origins = ["*"] if not _is_production else [
-    "https://malik-shahzad-hackhaton-template-1-production.up.railway.app",
-    "http://localhost:3000",
-    "http://localhost:3001",
-]
+cors_origins = ["*"]
 cors_kwargs = dict(
     allow_origins=cors_origins,
     allow_credentials=True,
