@@ -14,22 +14,22 @@ from app.routers import admin, cart, chatbot, notifications, orders, payments, p
 
 app = FastAPI(title="SHOP.CO API", version="1.0.0")
 
-# CORS - restrict in production, allow all in local dev
+# CORS - restrict in production (allow Vercel domains via regex), allow all in local dev
 _is_production = "postgresql" in settings.DATABASE_URL or "postgres" in settings.DATABASE_URL
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "*",
-    ] if not _is_production else [
-        "https://malik-shahzad-hackhaton-template-1-production.up.railway.app",
-        "https://shopco.vercel.app",
-        "http://localhost:3000",
-        "http://localhost:3001",
-    ],
+cors_origins = ["*"] if not _is_production else [
+    "https://malik-shahzad-hackhaton-template-1-production.up.railway.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+]
+cors_kwargs = dict(
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+if _is_production:
+    cors_kwargs["allow_origin_regex"] = r"https?:\/\/.*\.vercel\.app"
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 # Include routers
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
