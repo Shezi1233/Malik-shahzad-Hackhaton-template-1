@@ -271,17 +271,6 @@ class WishlistResponse(BaseModel):
     total: int
 
 
-# ===== PASSWORD RESET SCHEMAS =====
-class ForgotPasswordRequest(BaseModel):
-    email: str
-
-
-class ResetPasswordRequest(BaseModel):
-    token: str
-    new_password: str
-
-
-# ===== PROMO CODE SCHEMAS =====
 class PromoCodeCreate(BaseModel):
     code: str
     discount_amount: float

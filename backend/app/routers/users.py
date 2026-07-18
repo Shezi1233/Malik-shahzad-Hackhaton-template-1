@@ -1,9 +1,7 @@
-import os
-import shutil
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.auth import (
@@ -17,9 +15,7 @@ from app.database import get_db
 from app.models import User
 from app.schemas import (
     ForgotPasswordRequest,
-    GoogleAuthRequest,
-    ResetPasswordRequest,
-    TokenResponse,
+    GoogleAuthRequest,TokenResponse,
     UserResponse,
     UserSigninRequest,
     UserSignupRequest,
@@ -171,73 +167,3 @@ def update_profile(
     return UserResponse.model_validate(current_user)
 
 
-@router.post("/forgot-password")
-def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
-    """Generate a password reset token and return it (in production, email this)."""
-    user = db.query(User).filter(User.email == req.email).first()
-    if not user:
-        # Don't reveal whether email exists
-        return {"message": "If that email exists, a reset link has been sent."}
-
-    # Generate reset token
-    reset_token = uuid.uuid4().hex
-    user.reset_token = reset_token
-    user.reset_token_expiry = datetime.now(timezone.utc) + timedelta(hours=2)
-    db.commit()
-
-    # In development, return the token directly
-    # In production, send via email
-    return {
-        "message": "If that email exists, a reset link has been sent.",
-        "reset_token": reset_token,  # TODO: remove in production — for dev convenience
-    }
-
-
-@router.post("/reset-password")
-def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
-    """Reset password using a valid reset token."""
-    if not req.token or len(req.token) < 10:
-        raise HTTPException(status_code=400, detail="Invalid reset token")
-
-    user = db.query(User).filter(User.reset_token == req.token).first()
-    if not user:
-        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
-
-    if not user.reset_token_expiry or datetime.now(timezone.utc) > user.reset_token_expiry:
-        raise HTTPException(status_code=400, detail="Reset token has expired")
-
-    # Update password
-    user.hashed_password = hash_password(req.new_password)
-    user.reset_token = None
-    user.reset_token_expiry = None
-    db.commit()
-
-    return {"message": "Password has been reset successfully. You can now sign in with your new password."}
-
-
-AVATAR_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "public", "uploads", "avatars")
-os.makedirs(AVATAR_DIR, exist_ok=True)
-
-
-@router.post("/avatar")
-def upload_avatar(
-    file: UploadFile = File(...),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Upload a profile avatar image."""
-    ext = os.path.splitext(file.filename or ".png")[1].lower()
-    if ext not in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
-        raise HTTPException(status_code=400, detail="Invalid file type")
-
-    filename = f"avatar_{current_user.id}_{uuid.uuid4().hex[:8]}{ext}"
-    filepath = os.path.join(AVATAR_DIR, filename)
-
-    with open(filepath, "wb") as f:
-        shutil.copyfileobj(file.file, f)
-
-    avatar_url = f"/uploads/avatars/{filename}"
-    current_user.avatar_url = avatar_url
-    db.commit()
-
-    return {"avatar_url": avatar_url}

@@ -37,8 +37,6 @@ class User(Base):
     avatar_url = Column(String(500), nullable=True)
     is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_utcnow)
-    reset_token = Column(String(255), nullable=True)
-    reset_token_expiry = Column(DateTime, nullable=True)
 
     cart_items = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")
@@ -83,7 +81,7 @@ class CartItem(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, default=1)
     size = Column(String(10), nullable=True)
@@ -98,7 +96,7 @@ class Order(Base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     status = Column(String(20), default="pending")
     subtotal = Column(Float, nullable=False)
     discount = Column(Float, default=0)
