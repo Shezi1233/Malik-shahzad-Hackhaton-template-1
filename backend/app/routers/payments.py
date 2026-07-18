@@ -8,6 +8,8 @@ from app.auth import get_current_user
 from app.config import settings
 from app.database import get_db
 from app.models import CartItem, Order, Product
+from app.routers.orders import validate_and_decrement_stock
+from app.routers.promocodes import _get_discount
 
 router = APIRouter()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -90,19 +92,14 @@ async def confirm_payment(
     if not cart_items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    # Calculate totals
-    subtotal = 0.0
-    for item in cart_items:
-        if item.product:
-            subtotal += item.product.price * item.quantity
+    # Validate stock & calculate subtotal
+    subtotal = validate_and_decrement_stock(db, cart_items)
 
-    discount = 0
-    promo = shipping.get("promo_code", "")
-    if promo and promo.strip().upper() == "DISCOUNT10":
-        discount = 30
+    discount = _get_discount(shipping.get("promo_code", "") or "", db)
 
     delivery_fee = 15
-    total = subtotal - discount + delivery_fee
+    tax_amount = round(subtotal * 0.08, 2)
+    total = subtotal - discount + delivery_fee + tax_amount
 
     # Create order
     order = Order(
@@ -111,6 +108,7 @@ async def confirm_payment(
         subtotal=subtotal,
         discount=discount,
         delivery_fee=delivery_fee,
+        tax_amount=tax_amount,
         total=total,
         shipping_name=shipping.get("shipping_name", ""),
         shipping_email=shipping.get("shipping_email", ""),
@@ -152,4 +150,84 @@ async def confirm_payment(
         "status": "paid",
         "total": total,
         "payment_intent_id": payment_intent_id,
+    }
+
+
+class CODPaymentRequest(BaseModel):
+    shipping: dict
+
+
+@router.post("/cod-confirm")
+def confirm_cod_payment(
+    req: CODPaymentRequest,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Confirm a Cash on Delivery order."""
+    shipping = req.shipping
+
+    # Get cart items
+    cart_items = (
+        db.query(CartItem).filter(CartItem.user_id == current_user.id).all()
+    )
+    if not cart_items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
+    # Validate stock & calculate subtotal
+    subtotal = validate_and_decrement_stock(db, cart_items)
+
+    discount = _get_discount(shipping.get("promo_code", "") or "", db)
+
+    delivery_fee = 15
+    tax_amount = round(subtotal * 0.08, 2)
+    total = subtotal - discount + delivery_fee + tax_amount
+
+    # Create order with COD status
+    order = Order(
+        user_id=current_user.id,
+        status="pending",
+        subtotal=subtotal,
+        discount=discount,
+        delivery_fee=delivery_fee,
+        tax_amount=tax_amount,
+        total=total,
+        shipping_name=shipping.get("shipping_name", ""),
+        shipping_email=shipping.get("shipping_email", ""),
+        shipping_address=shipping.get("shipping_address", ""),
+        shipping_city=shipping.get("shipping_city", ""),
+        shipping_postal_code=shipping.get("shipping_postal_code", ""),
+        shipping_country=shipping.get("shipping_country", ""),
+        payment_method="cod",
+        payment_status="unpaid",
+    )
+    db.add(order)
+    db.flush()
+
+    # Create order items from cart
+    for cart_item in cart_items:
+        product = cart_item.product
+        order_item = {
+            "order_id": order.id,
+            "product_id": product.id,
+            "title": product.title,
+            "price": product.price,
+            "quantity": cart_item.quantity,
+            "size": cart_item.size,
+            "color": cart_item.color,
+        }
+        from app.models import OrderItem
+        db.add(OrderItem(**order_item))
+
+    # Clear cart
+    for item in cart_items:
+        db.delete(item)
+
+    db.commit()
+    db.refresh(order)
+
+    return {
+        "order_id": order.id,
+        "status": "pending",
+        "total": total,
+        "payment_method": "cod",
     }

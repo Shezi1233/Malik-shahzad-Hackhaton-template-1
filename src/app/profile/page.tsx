@@ -198,11 +198,71 @@ function ProfileContent() {
                 <p className="text-sm mt-1">
                   {order.items.length} item(s) — <span className="font-bold">${order.total.toFixed(2)}</span>
                 </p>
+                {(order.status === "pending" || order.status === "processing") && (
+                  <CancelOrderButton orderId={order.id} onCancelled={() => {
+                    setOrders((prev) =>
+                      prev.map((o) =>
+                        o.id === order.id ? { ...o, status: "cancelled" } : o
+                      )
+                    );
+                  }} />
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function CancelOrderButton({ orderId, onCancelled }: { orderId: number; onCancelled: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+
+  const handleCancel = async () => {
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.put(`/orders/${orderId}/cancel`, {});
+      onCancelled();
+    } catch (err: any) {
+      alert(err.message || "Failed to cancel order");
+    } finally {
+      setLoading(false);
+      setConfirming(false);
+    }
+  };
+
+  return (
+    <div className="mt-2">
+      {confirming ? (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCancel}
+            disabled={loading}
+            className="text-xs bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 disabled:opacity-50"
+          >
+            {loading ? "Cancelling..." : "Yes, Cancel Order"}
+          </button>
+          <button
+            onClick={() => setConfirming(false)}
+            className="text-xs text-gray-500 px-2 py-1 hover:text-black"
+          >
+            No
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={handleCancel}
+          className="text-xs text-red-500 hover:text-red-700 font-medium mt-1"
+        >
+          Cancel Order
+        </button>
+      )}
     </div>
   );
 }

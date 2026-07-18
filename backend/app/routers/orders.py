@@ -4,12 +4,32 @@ from sqlalchemy.orm import Session
 from app.auth import get_current_user
 from app.database import get_db
 from app.models import CartItem, Notification, Order, OrderItem, Product, User
+from app.routers.promocodes import _get_discount
 from app.schemas import (
     OrderCreateRequest,
     OrderItemResponse,
     OrderResponse,
     OrderTrackResponse,
 )
+
+
+def validate_and_decrement_stock(db: Session, cart_items: list) -> float:
+    """Validate stock availability and decrement. Returns subtotal."""
+    subtotal = 0.0
+    for item in cart_items:
+        product = item.product
+        if not product:
+            raise HTTPException(status_code=400, detail=f"Product not found for cart item #{item.id}")
+        if product.stock is not None and item.quantity > product.stock:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Insufficient stock for '{product.title}'. Available: {product.stock}, requested: {item.quantity}",
+            )
+        # Decrement stock
+        if product.stock is not None:
+            product.stock -= item.quantity
+        subtotal += product.price * item.quantity
+    return subtotal
 
 router = APIRouter()
 
@@ -21,6 +41,7 @@ def _build_order_response(order: Order) -> OrderResponse:
         subtotal=order.subtotal,
         discount=order.discount,
         delivery_fee=order.delivery_fee,
+        tax_amount=order.tax_amount or 0,
         total=order.total,
         shipping_name=order.shipping_name,
         shipping_email=order.shipping_email,
@@ -58,18 +79,15 @@ def create_order(
     if not cart_items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    # Calculate totals
-    subtotal = 0.0
-    for item in cart_items:
-        if item.product:
-            subtotal += item.product.price * item.quantity
+    # Validate stock & calculate subtotal
+    subtotal = validate_and_decrement_stock(db, cart_items)
 
-    discount = 0
-    if req.promo_code and req.promo_code.strip().upper() == "DISCOUNT10":
-        discount = 30
+    # Look up promo code from DB
+    discount = _get_discount(req.promo_code or "", db)
 
     delivery_fee = 15
-    total = subtotal - discount + delivery_fee
+    tax_amount = round(subtotal * 0.08, 2)
+    total = subtotal - discount + delivery_fee + tax_amount
 
     # Create order
     order = Order(
@@ -78,6 +96,7 @@ def create_order(
         subtotal=subtotal,
         discount=discount,
         delivery_fee=delivery_fee,
+        tax_amount=tax_amount,
         total=total,
         shipping_name=req.shipping_name,
         shipping_email=req.shipping_email,
@@ -175,3 +194,54 @@ def track_order(order_id: int, db: Session = Depends(get_db)):
             for item in order.items
         ],
     )
+
+
+def restore_stock_for_order(order: Order, db: Session):
+    """Restore product stock when an order is cancelled."""
+    for item in order.items:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if product and product.stock is not None:
+            product.stock += item.quantity
+    db.flush()
+
+
+@router.put("/{order_id}/cancel", response_model=OrderResponse)
+def cancel_order(
+    order_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Cancel an order if it's still pending or processing."""
+    order = (
+        db.query(Order)
+        .filter(Order.id == order_id, Order.user_id == current_user.id)
+        .first()
+    )
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    if order.status not in ("pending", "processing"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot cancel order in '{order.status}' status. Only 'pending' or 'processing' orders can be cancelled.",
+        )
+
+    old_status = order.status
+    order.status = "cancelled"
+
+    # Restore product stock
+    restore_stock_for_order(order, db)
+
+    db.commit()
+    db.refresh(order)
+
+    # Create notification
+    notification = Notification(
+        user_id=current_user.id,
+        title="Order Cancelled",
+        message=f"Your order #{order.id} has been cancelled.",
+    )
+    db.add(notification)
+    db.commit()
+
+    return _build_order_response(order)

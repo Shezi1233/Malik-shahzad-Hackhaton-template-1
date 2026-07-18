@@ -1,3 +1,6 @@
+import uuid
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -11,7 +14,9 @@ from app.config import settings
 from app.database import get_db
 from app.models import User
 from app.schemas import (
+    ForgotPasswordRequest,
     GoogleAuthRequest,
+    ResetPasswordRequest,
     TokenResponse,
     UserResponse,
     UserSigninRequest,
@@ -162,3 +167,47 @@ def update_profile(
     db.commit()
     db.refresh(current_user)
     return UserResponse.model_validate(current_user)
+
+
+@router.post("/forgot-password")
+def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """Generate a password reset token and return it (in production, email this)."""
+    user = db.query(User).filter(User.email == req.email).first()
+    if not user:
+        # Don't reveal whether email exists
+        return {"message": "If that email exists, a reset link has been sent."}
+
+    # Generate reset token
+    reset_token = uuid.uuid4().hex
+    user.reset_token = reset_token
+    user.reset_token_expiry = datetime.now(timezone.utc) + timedelta(hours=2)
+    db.commit()
+
+    # In development, return the token directly
+    # In production, send via email
+    return {
+        "message": "If that email exists, a reset link has been sent.",
+        "reset_token": reset_token,  # TODO: remove in production — for dev convenience
+    }
+
+
+@router.post("/reset-password")
+def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """Reset password using a valid reset token."""
+    if not req.token or len(req.token) < 10:
+        raise HTTPException(status_code=400, detail="Invalid reset token")
+
+    user = db.query(User).filter(User.reset_token == req.token).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+
+    if not user.reset_token_expiry or datetime.now(timezone.utc) > user.reset_token_expiry:
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+
+    # Update password
+    user.hashed_password = hash_password(req.new_password)
+    user.reset_token = None
+    user.reset_token_expiry = None
+    db.commit()
+
+    return {"message": "Password has been reset successfully. You can now sign in with your new password."}

@@ -9,6 +9,7 @@ import {
   Package,
   ShoppingCart,
   Users,
+  Tag,
   ArrowLeft,
   Menu,
   X,
@@ -19,6 +20,7 @@ const sidebarLinks = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/promocodes", label: "Promo Codes", icon: Tag },
 ];
 
 export default function AdminLayout({

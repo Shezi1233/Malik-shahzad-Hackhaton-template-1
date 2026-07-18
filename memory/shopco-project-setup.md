@@ -1,1 +1,2 @@
-- [shopco-project-setup](shopco-project-setup.md) — Project structure, tech stack, env config, chatbot RAG setup
+- [shopco-project-setup](shopco-project-setup.md) — Complete SHOP.CO project reference: stack, structure, API, auth, chatbot, payments, deployment
+- [CLAUDE.md](../CLAUDE.md) — Comprehensive project analysis with full file structure, all API routes, DB models, and architecture details

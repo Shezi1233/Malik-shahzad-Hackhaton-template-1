@@ -8,6 +8,7 @@ import { NavigationMenuDemo } from "./NavigationMenu";
 import Notifications from "./notifications";
 import { IoIosSearch } from "react-icons/io";
 import { IoCartOutline } from "react-icons/io5";
+import { Heart } from "lucide-react";
 import { useAuth } from "./authContext";
 import { useCart } from "./cartContext";
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -160,7 +161,7 @@ export default function Header() {
                         width={48}
                         height={48}
                         className="w-full h-full object-cover"
-                        unoptimized
+                       
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = "/products/product_1.png";
                         }}
@@ -208,6 +209,9 @@ export default function Header() {
           <IoIosSearch className="text-2xl" />
         </button>
 
+        <Link href={"/wishlist"} className="relative">
+          <Heart className="text-2xl sm:text-3xl" />
+        </Link>
         <Link href={"/cart"} className="relative">
           <IoCartOutline className="text-2xl sm:text-3xl" />
           {cart.length > 0 && (

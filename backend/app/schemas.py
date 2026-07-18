@@ -143,6 +143,7 @@ class OrderResponse(BaseModel):
     subtotal: float
     discount: float
     delivery_fee: float
+    tax_amount: float = 0
     total: float
     shipping_name: str
     shipping_email: str
@@ -216,12 +217,26 @@ class AdminOrderUpdate(BaseModel):
     status: str  # pending, processing, shipped, delivered, cancelled
 
 
+class MonthlySales(BaseModel):
+    month: str  # "2024-01"
+    total: float
+
+
+class TopProduct(BaseModel):
+    id: int
+    title: str
+    total_sold: int
+    revenue: float
+
+
 class DashboardResponse(BaseModel):
     total_products: int
     total_orders: int
     total_users: int
     total_revenue: float
     recent_orders: List[OrderResponse] = []
+    monthly_sales: List[MonthlySales] = []
+    top_products: List[TopProduct] = []
 
 
 class UserAdminResponse(BaseModel):
@@ -234,3 +249,71 @@ class UserAdminResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ===== WISHLIST SCHEMAS =====
+class WishlistItemResponse(BaseModel):
+    id: int
+    product_id: int
+    title: str
+    price: float
+    old_price: Optional[float] = None
+    img_url: str
+    rating: float = 4.5
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class WishlistResponse(BaseModel):
+    items: List[WishlistItemResponse]
+    total: int
+
+
+# ===== PASSWORD RESET SCHEMAS =====
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+# ===== PROMO CODE SCHEMAS =====
+class PromoCodeCreate(BaseModel):
+    code: str
+    discount_amount: float
+    usage_limit: int = 0
+    is_active: bool = True
+
+
+class PromoCodeUpdate(BaseModel):
+    discount_amount: Optional[float] = None
+    usage_limit: Optional[int] = None
+    is_active: Optional[bool] = None
+
+
+class PromoCodeResponse(BaseModel):
+    id: int
+    code: str
+    discount_amount: float
+    is_active: bool = False
+    usage_limit: int = 0
+    used_count: int = 0
+    expires_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class PromoCodeValidate(BaseModel):
+    code: str
+
+
+class PromoCodeValidateResponse(BaseModel):
+    valid: bool
+    discount_amount: float = 0
+    message: str = ""

@@ -37,10 +37,13 @@ class User(Base):
     avatar_url = Column(String(500), nullable=True)
     is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_utcnow)
+    reset_token = Column(String(255), nullable=True)
+    reset_token_expiry = Column(DateTime, nullable=True)
 
     cart_items = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    wishlist_items = relationship("WishlistItem", back_populates="user", cascade="all, delete-orphan")
 
 
 class Product(Base):
@@ -100,6 +103,7 @@ class Order(Base):
     subtotal = Column(Float, nullable=False)
     discount = Column(Float, default=0)
     delivery_fee = Column(Float, default=15)
+    tax_amount = Column(Float, default=0)
     total = Column(Float, nullable=False)
     shipping_name = Column(String(200))
     shipping_email = Column(String(255))
@@ -143,3 +147,31 @@ class Notification(Base):
     created_at = Column(DateTime, default=_utcnow)
 
     user = relationship("User", back_populates="notifications")
+
+
+class WishlistItem(Base):
+    __tablename__ = "wishlist_items"
+    __table_args__ = (
+        UniqueConstraint("user_id", "product_id", name="uq_user_product_wishlist"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    created_at = Column(DateTime, default=_utcnow)
+
+    user = relationship("User", back_populates="wishlist_items")
+    product = relationship("Product")
+
+
+class PromoCode(Base):
+    __tablename__ = "promo_codes"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    code = Column(String(50), unique=True, nullable=False, index=True)
+    discount_amount = Column(Float, nullable=False)
+    is_active = Column(Boolean, default=True)
+    usage_limit = Column(Integer, default=0)
+    used_count = Column(Integer, default=0)
+    expires_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=_utcnow)

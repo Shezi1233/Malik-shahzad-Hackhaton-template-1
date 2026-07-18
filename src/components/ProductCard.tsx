@@ -76,7 +76,7 @@ export default function ProductCard({
               height={400}
               onError={() => setImgError(true)}
               priority={id <= 8}
-              unoptimized
+             
             />
           )}
 

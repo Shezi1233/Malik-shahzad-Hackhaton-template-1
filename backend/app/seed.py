@@ -1,8 +1,10 @@
 from datetime import datetime
 
+from datetime import datetime, timedelta, timezone
+
 from app.auth import hash_password
 from app.database import SessionLocal
-from app.models import Notification, Product, User
+from app.models import Notification, Product, PromoCode, User
 
 
 def seed_database():
@@ -1008,6 +1010,19 @@ def seed_database():
             ),
         ]
         db.add_all(notifications)
+
+        # Seed default promo codes
+        existing_promo = db.query(PromoCode).filter(PromoCode.code == "DISCOUNT10").first()
+        if not existing_promo:
+            promo = PromoCode(
+                code="DISCOUNT10",
+                discount_amount=30,
+                is_active=True,
+                usage_limit=100,
+            )
+            db.add(promo)
+            print("✅ Default promo code 'DISCOUNT10' created!")
+
         db.commit()
         total_products = db.query(Product).count()
         total_categories = db.query(Product.category).distinct().count()

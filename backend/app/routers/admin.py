@@ -16,9 +16,11 @@ from app.schemas import (
     AdminProductCreate,
     AdminProductUpdate,
     DashboardResponse,
+    MonthlySales,
     OrderItemResponse,
     OrderResponse,
     ProductResponse,
+    TopProduct,
     UserAdminResponse,
 )
 
@@ -119,12 +121,50 @@ def get_dashboard(
         .all()
     )
 
+    # Monthly sales aggregation
+    monthly_data = {}
+    paid_orders = db.query(Order).filter(Order.payment_status == "paid").all()
+    for order in paid_orders:
+        if order.created_at:
+            month_key = order.created_at.strftime("%Y-%m")
+            monthly_data[month_key] = monthly_data.get(month_key, 0) + order.total
+    monthly_sales = [
+        MonthlySales(month=month, total=round(total, 2))
+        for month, total in sorted(monthly_data.items())[-12:]
+    ]
+
+    # Top products by quantity sold
+    from sqlalchemy import desc
+    top_product_data = (
+        db.query(
+            OrderItem.product_id,
+            func.sum(OrderItem.quantity).label("total_sold"),
+            func.sum(OrderItem.price * OrderItem.quantity).label("revenue"),
+        )
+        .group_by(OrderItem.product_id)
+        .order_by(desc("total_sold"))
+        .limit(10)
+        .all()
+    )
+    top_products = []
+    for pid, sold, rev in top_product_data:
+        product = db.query(Product).filter(Product.id == pid).first()
+        if product:
+            top_products.append(TopProduct(
+                id=pid,
+                title=product.title,
+                total_sold=int(sold),
+                revenue=round(float(rev), 2),
+            ))
+
     return DashboardResponse(
         total_products=total_products,
         total_orders=total_orders,
         total_users=total_users,
         total_revenue=total_revenue,
         recent_orders=[_build_order_response(o) for o in recent_orders],
+        monthly_sales=monthly_sales,
+        top_products=top_products,
     )
 
 

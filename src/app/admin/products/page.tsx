@@ -443,7 +443,7 @@ export default function AdminProducts() {
                             width={56}
                             height={56}
                             className="w-full h-full object-cover"
-                            unoptimized
+                           
                             onError={(e) => {
                               (e.target as HTMLImageElement).style.display = "none";
                             }}
@@ -531,7 +531,7 @@ export default function AdminProducts() {
                                 width={40}
                                 height={40}
                                 className="w-full h-full object-cover"
-                                unoptimized
+                               
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).style.display = "none";
                                 }}
@@ -832,7 +832,7 @@ export default function AdminProducts() {
                         width={80}
                         height={80}
                         className="w-full h-full object-cover"
-                        unoptimized
+                       
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">

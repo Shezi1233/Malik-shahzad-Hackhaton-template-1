@@ -10,15 +10,21 @@ from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.database import Base, SessionLocal, engine
 from app.models import CartItem, Notification, Order, OrderItem, Product, User
-from app.routers import admin, cart, chatbot, notifications, orders, payments, products, users
+from app.routers import admin, cart, chatbot, notifications, orders, payments, products, promocodes, users, wishlist
 
 app = FastAPI(title="SHOP.CO API", version="1.0.0")
 
-# CORS - allow Next.js frontend (any port) + production Vercel domain
+# CORS - restrict in production, allow all in local dev
+_is_production = "postgresql" in settings.DATABASE_URL or "postgres" in settings.DATABASE_URL
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "*",  # Allow all origins (including localhost dev servers)
+        "*",
+    ] if not _is_production else [
+        "https://malik-shahzad-hackhaton-template-1-production.up.railway.app",
+        "https://shopco.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:3001",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -32,8 +38,10 @@ app.include_router(products.router, prefix="/api/products", tags=["Products"])
 app.include_router(cart.router, prefix="/api/cart", tags=["Cart"])
 app.include_router(orders.router, prefix="/api/orders", tags=["Orders"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(wishlist.router, prefix="/api/wishlist", tags=["Wishlist"])
 app.include_router(chatbot.router, prefix="/api/chatbot", tags=["Chatbot"])
 app.include_router(payments.router, prefix="/api/payments", tags=["Payments"])
+app.include_router(promocodes.router, prefix="/api/promocodes", tags=["Promo Codes"])
 
 # Serve uploaded files
 uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public", "uploads")

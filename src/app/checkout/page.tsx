@@ -191,6 +191,23 @@ const Checkout = () => {
   const [error, setError] = useState("");
   const [orderConfirmed, setOrderConfirmed] = useState<any>(null);
   const [step, setStep] = useState<"shipping" | "payment">("shipping");
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "cod">("stripe");
+  const [codProcessing, setCodProcessing] = useState(false);
+
+  const handleCODSubmit = async () => {
+    setCodProcessing(true);
+    setError("");
+    try {
+      const result = await api.post<any>("/payments/cod-confirm", {
+        shipping: { ...shipping, promo_code: shipping.promo_code || "" },
+      });
+      setOrderConfirmed(result);
+    } catch (err: any) {
+      setError(err.message || "Failed to place order");
+    } finally {
+      setCodProcessing(false);
+    }
+  };
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Pre-fill shipping from user profile
@@ -333,8 +350,12 @@ const Checkout = () => {
               </svg>
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment Successful! 🎉</h2>
-          <p className="text-gray-500 mb-1">Thank you for your purchase</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {orderConfirmed.payment_method === "cod" ? "Order Placed! 🎉" : "Payment Successful! 🎉"}
+          </h2>
+          <p className="text-gray-500 mb-1">
+            {orderConfirmed.payment_method === "cod" ? "Your order has been placed. Pay when you receive." : "Thank you for your purchase"}
+          </p>
           <div className="bg-gray-50 rounded-xl p-4 mt-6 space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Order ID</span>
@@ -533,8 +554,61 @@ const Checkout = () => {
                     <p className="text-gray-600">{shipping.shipping_country} {shipping.shipping_postal_code}</p>
                   </div>
 
+                  {/* Payment Method Selection */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Payment Method</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => { setPaymentMethod("stripe"); if (!clientSecret) createPaymentIntent(); }}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          paymentMethod === "stripe" ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <CreditCard className="w-4 h-4 mb-1" />
+                        <span className="font-semibold text-sm block">Credit Card</span>
+                        <p className="text-xs text-gray-500">Visa, Mastercard</p>
+                      </button>
+                      <button
+                        onClick={() => setPaymentMethod("cod")}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          paymentMethod === "cod" ? "border-black bg-gray-50" : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <svg className="w-4 h-4 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                        </svg>
+                        <span className="font-semibold text-sm block">Cash on Delivery</span>
+                        <p className="text-xs text-gray-500">Pay on arrival</p>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* COD Payment */}
+                  {paymentMethod === "cod" && (
+                    <div className="space-y-4">
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+                        <p className="font-medium mb-1">💵 Cash on Delivery</p>
+                        <p className="text-amber-600">Pay when your order arrives. No advance payment needed.</p>
+                      </div>
+                      <button
+                        onClick={handleCODSubmit}
+                        disabled={codProcessing}
+                        className="w-full bg-black hover:bg-gray-900 text-white py-4 rounded-xl font-semibold text-base transition-all disabled:bg-gray-300 flex items-center justify-center gap-2"
+                      >
+                        {codProcessing ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Placing Order...
+                          </>
+                        ) : (
+                          <>Place Order (COD)</>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
                   {/* Stripe payment */}
-                  {loadingIntent ? (
+                  {paymentMethod === "stripe" && (loadingIntent ? (
                     <div className="flex flex-col items-center justify-center py-12">
                       <div className="w-10 h-10 border-3 border-gray-200 border-t-black rounded-full animate-spin mb-4" />
                       <p className="text-sm font-medium text-gray-700">Preparing secure payment...</p>
@@ -581,7 +655,7 @@ const Checkout = () => {
                   <div key={item.id} className="flex gap-3 bg-gray-50 rounded-xl p-3 group hover:bg-gray-100/70 transition-all duration-200">
                     <div className="w-[65px] h-[65px] rounded-lg overflow-hidden bg-white flex-shrink-0 border border-gray-100">
                       <Image src={item.img_url} alt={item.title} width={65} height={65}
-                        className="w-full h-full object-cover" unoptimized
+                        className="w-full h-full object-cover"
                         onError={(e) => { (e.target as HTMLImageElement).src = "/products/product_1.png"; }} />
                     </div>
                     <div className="flex-1 min-w-0">
