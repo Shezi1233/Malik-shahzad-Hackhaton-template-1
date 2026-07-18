@@ -1,9 +1,11 @@
-import type { Config } from "jest";
+// @ts-check
+/** @type {import("jest").Config} */
 import nextJest from "next/jest";
 
 const createJestConfig = nextJest({ dir: "./" });
+const config = {
 
-const config: Config = {
+const config = {
   testEnvironment: "jsdom",
   setupFilesAfterSetup: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: {
@@ -12,4 +14,4 @@ const config: Config = {
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/", "<rootDir>/backend/"],
 };
 
-export default createJestConfig(config);
+module.exports = createJestConfig(config);
