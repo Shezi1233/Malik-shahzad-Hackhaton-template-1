@@ -149,6 +149,31 @@ def reseed():
     seed_database()
     return {"message": "Database re-seeded successfully"}
 
+@app.post("/api/fix-db")
+def fix_database():
+    """Add missing columns to Railway PostgreSQL tables."""
+    import traceback
+    from sqlalchemy import text
+    results = []
+    try:
+        with engine.connect() as conn:
+            alter_commands = [
+                "ALTER TABLE orders ADD COLUMN IF NOT EXISTS tax_amount FLOAT DEFAULT 0",
+                "ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_payment_intent_id VARCHAR(200)",
+                "ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status VARCHAR(30) DEFAULT ""unpaid"" ",
+            ]
+            for cmd in alter_commands:
+                try:
+                    conn.execute(text(cmd))
+                    conn.commit()
+                    results.append(f"OK: {cmd[:60]}")
+                except Exception as e:
+                    results.append(f"ERR: {str(e)[:60]}")
+        return {"message": "Database fix complete", "results": results}
+    except Exception as e:
+        return {"error": str(e), "traceback": traceback.format_exc()}
+
+
 
 
 
