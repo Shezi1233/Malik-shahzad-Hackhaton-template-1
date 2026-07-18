@@ -149,6 +149,20 @@ def reseed():
     seed_database()
     return {"message": "Database re-seeded successfully"}
 
+@app.post("/api/reset-db")
+def reset_database():
+    """Drop all tables, recreate them with current schema, and re-seed."""
+    try:
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        return {"error": f"Failed to reset schema: {str(e)}"}
+
+    from app.seed import seed_database
+    seed_database()
+    return {"message": "Database schema reset and re-seeded successfully"}
+
+
 
 @app.post("/api/seed-products")
 def seed_products_direct():
