@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-specific adjustments */
+@media (max-width: 640px) {
+  body > div {
+    overflow-x: hidden;
+  }
+}
+
 /* Root Variables */
 @layer base {
   :root {
@@ -65,27 +72,26 @@
     @apply border-border;
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Ensure consistent spacing */
+    box-sizing: border-box;
   }
 
   body {
-    @apply bg-background text-foreground overflow-x-hidden; /* Prevent horizontal scrolling globally */
+    @apply bg-background text-foreground overflow-x-hidden;
   }
 
   img,
   video {
-    max-width: 100%; /* Responsive images and videos */
+    max-width: 100%;
     height: auto;
   }
 
-  /* Prevent extra spacing for specific tags */
   h1, h2, h3, h4, h5, h6, p {
     margin: 0;
   }
 
   a {
     text-decoration: none;
-    color: inherit; /* Ensure links inherit text color */
+    color: inherit;
   }
 
   ul, ol {

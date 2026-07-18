@@ -137,7 +137,7 @@ const Chatbot = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 bg-black text-white rounded-full p-4 shadow-xl hover:bg-gray-800 transition-all z-50 hover:scale-105 active:scale-95"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 bg-black text-white rounded-full p-4 shadow-xl hover:bg-gray-800 transition-all z-[100] hover:scale-105 active:scale-95"
         aria-label="Open chat"
       >
         <MessageCircle size={24} />
@@ -145,8 +145,8 @@ const Chatbot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-20 right-4 w-80 sm:w-96 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl border flex flex-col overflow-hidden max-h-[650px]">
+        <div className="fixed bottom-20 right-2 left-2 sm:left-auto sm:right-4 sm:w-96 z-[100] animate-in fade-in slide-in-from-bottom-5 duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border flex flex-col overflow-hidden max-h-[550px] sm:max-h-[650px]">
             {/* Header */}
             <div className="bg-gradient-to-r from-black to-gray-800 text-white px-4 py-3 flex justify-between items-center flex-shrink-0">
               <div className="flex items-center gap-2">

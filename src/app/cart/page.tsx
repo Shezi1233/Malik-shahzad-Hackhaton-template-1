@@ -42,7 +42,7 @@ export default function Cart() {
 
   return (
     <>
-      <div className="pl-5 max-w-screen-2xl mx-auto">
+      <div className="max-w-screen-2xl px-3 sm:px-8 mx-auto">
         <BreadcrumbDemo />
         <h1 className="text-2xl font-bold mt-2">Your Cart</h1>
       </div>
