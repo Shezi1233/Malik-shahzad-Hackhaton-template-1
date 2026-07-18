@@ -189,7 +189,7 @@ const Checkout = () => {
   const [paymentIntentId, setPaymentIntentId] = useState("");
   const [loadingIntent, setLoadingIntent] = useState(false);
   const [error, setError] = useState("");
-  const [orderConfirmed, setOrderConfirmed] = useState<any>(null);
+  const [orderConfirmed, setOrderConfirmed] = useState(null) as any;
   const [step, setStep] = useState<"shipping" | "payment">("shipping");
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "cod">("stripe");
   const [codProcessing, setCodProcessing] = useState(false);
@@ -630,7 +630,7 @@ const Checkout = () => {
                         Try Again
                       </button>
                     </div>
-                  )}
+                  ))}
                 </>
               )}
             </div>
